@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="login.css">
+        <title>Login/Register</title>
+    </head>
+    <body>
+        <div id = "roleChoice">
+            <form>
+                <div>
+                    <input type="radio" id="student" name="choice" value="student">
+                    <label for="student">Student</label>
+                </div>
+                <div>
+                    <input type="radio" id="admin" name="choice" value="admin">
+                    <label for="admin">Admin</label>
+                </div>
+            </form>
+        </div>
+        <div class = "container" id = "login">
+            <h2>Login</h2>
+            <input type = "text" placeholder="Username" required>
+            <input type = "password" placeholder="Password" required>
+            <input type = "submit" value = "Login">
+        </div>
+        <div class = "container" id = "register">
+            <h2>Registration</h2>
+            <input type = "text" placeholder="Username" required>
+            <input type = "email" placeholder="Email" required>
+            <input type = "password" placeholder="Password" required>
+            <input type = "password" placeholder="Confirm Password" required>
+            <input type = "submit" value = "Register">
+        </div>
+    </body>
+</html>
