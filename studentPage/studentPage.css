@@ -1,0 +1,30 @@
+/* I will make the css to have
+   variables for all of us to use ~Raymond */
+:root{
+    /* Main color - Blue */
+    --primary-blue: #2563eb;
+    --primary-blue-dark: #1e40af;
+    --primary-blue-light: #dbeafe;
+  
+   /* Gray Colors */
+   --neutral-50: #f9fafb;
+   --neutral-100: #f3f4f6;
+   --neutral-200: #e5e7eb;
+   --neutral-600: #4b5563;
+   --neutral-700: #374151;
+   --neutral-900: #111827;
+   --white: #ffffff;
+  
+   /* Spacing */
+   --space-sm: 0.5rem;
+   --space-md: 1rem;
+   --space-lg: 1.5rem;
+   --space-xl: 2rem;
+
+   /* Border Radius */
+   --radius-md: 0.5rem;
+   --radius-lg: 0.75;
+
+   /* Shadows */
+
+}
