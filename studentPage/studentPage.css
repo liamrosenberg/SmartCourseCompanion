@@ -10,6 +10,7 @@
    --neutral-50: #f9fafb;
    --neutral-100: #f3f4f6;
    --neutral-200: #e5e7eb;
+   --neutral-300: #d1d5db; 
    --neutral-600: #4b5563;
    --neutral-700: #374151;
    --neutral-900: #111827;
@@ -23,8 +24,154 @@
 
    /* Border Radius */
    --radius-md: 0.5rem;
-   --radius-lg: 0.75;
+   --radius-lg: 0.75rem;
 
    /* Shadows */
+   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
+}
+/* Remove default margins and paddding from everything */
+*{
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+}
+
+/* Set the base font and background */
+body{
+   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+   font-size: 16px;
+   line-height: 1.5;
+   color: var(--neutral-700);
+   background-color: var(--neutral-50);
+}
+
+/* Center content and adds padding on sides */
+.container{
+   max-width: 1200px;
+   margin: 0 auto;
+   padding: 0 var(--space-lg);
+}
+
+/* Header at the top */
+.dashboard-header{
+   background: var(--white);
+   padding: var(--space-lg) 0;
+   border-bottom: 1px solid var(--neutral-200);
+   margin-bottom: var(--space-xl);
+}
+
+/* h1 style */
+h1{
+   font-size: 2rem;
+   font-weight: 600;
+   color: var(--neutral-900);
+   margin-bottom: 0.25rem;
+}
+
+/* Secondary text Style */
+.text-secondary{
+   color: var(--neutral-600);
+   font-size: 0.875rem;
+}
+
+/* Padding for above and below content */
+.main-content{
+   padding: var(--space-xl) 0;
+}
+
+/* Card Components */
+.card{
+   background: var(--white);
+   border-radius: var(--radius-lg);
+   border: 1px solid var(--neutral-200);
+   padding: var(--space-lg);
+   margin-bottom: var(--space-lg);
+   transition: all 0.2s ease;
+}
+
+.card:hover{
+   border-color: var(--neutral-300);
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.card-body {
+   /* Content Inside cards */
+}
+
+/* For centered content in cards */
+.text-center{
+   text-align: center;
+}
+
+/* TYPOGRAPHY */
+h2 {
+   font-size: 1.5rem;
+   font-weight: 600;
+   color: var(--neutral-900);
+   margin-bottom: var(--space-md);
+}
+
+h3 {
+   font-size: 1.25rem;
+   font-weight: 600;
+   color: var(--neutral-900);
+   margin-bottom: var(--space-md);
+}
+
+h4{
+   font-size: 1.125rem;
+   font-weight: 500;
+   color: var(--neutral-900);
+   margin-bottom: var(--space-sm);
+}
+
+p{
+   margin-bottom: var(--space-md);
+}
+
+/* GRID */
+
+.grid{
+   display: grid;
+   gap: var(--space-lg);
+}
+
+.grid-3{
+   grid-template-columns: repeat(3, 1fr);
+}
+
+/* Responsive on smaller screens */
+@media(max-width: 768px) {
+   .grid-3{
+      grid-template-columns: 1fr;
+   }
+}
+
+/* Dashbaord Stats */
+
+.stat-number{
+   font-size: 2.5rem;
+   font-weight: 700;
+   margin-bottom: var(--space-sm);
+}
+
+.stat-label{
+   font-size: 0.875rem;
+   color: var(--neutral-600);
+   font-weight: 500;
+}
+
+/* Color variants */
+.text-primary {
+   color: var(--primary-blue);
+}
+
+.text-success{
+   color: #10b981
+}
+
+.text-warning{
+   color: #f59e0b;
 }
