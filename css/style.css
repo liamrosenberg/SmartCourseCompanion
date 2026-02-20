@@ -99,7 +99,7 @@ h1{
 }
 
 .card-body {
-   /* Content Inside cards */
+   display: block;
 }
 
 /* For centered content in cards */
@@ -334,3 +334,71 @@ a:hover{
    flex-wrap: wrap;
    justify-content: center;
 }
+
+/* =====================================
+      COURSE BROWSE PAGE STYLES
+   ===================================== */
+
+   /* Search Input */
+   .search-input{
+      width: 100%;
+      padding: var(--space-md);
+      font-size: 1rem;
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      transition: border-color 0.2s ease;
+
+   }
+
+   .search-input:focus{
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px var(--primary-blue-light);
+   }
+
+   /* Course Card Style */
+   .course-card{
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+   }
+
+   .course-header{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+   }
+
+   .course-code{
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--primary-blue);
+   }
+
+   .course-title{
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+      color: var(--neutral-900);
+   }
+
+   .course-description{
+      font-size: 0.875rem;
+      color: var(--neutral-600);
+      margin-bottom: var(--space-lg);
+      flex-grow: 1;
+      line-height: 1.6;
+   }
+
+   /* Full width button */
+   .btn-block{
+      width: 100;
+      margin-top: auto;
+   }
+
+   /* Utility for top margin */
+   .mt-xl{
+      margin-top: var(--space-xl);
+   }
