@@ -282,8 +282,8 @@ a:hover{
 }
 
 .badge-info{
-   background-color: var(--primary-blue);
-   color: var(--white);
+   background-color: var(--neutral-200);
+   color: var(--neutral-700);
 }
 
 /* BUTTONS */
@@ -326,6 +326,32 @@ a:hover{
    transform: translateY(-1px);
    text-decoration: none;
 }
+
+/* Animated back button */
+.btn-back {
+   position: relative;
+   transition: all 0.3s ease;
+}
+
+.btn-back::before {
+   content: '← ';
+   position: absolute;
+   left: 0.5rem;
+   opacity: 0;
+   transform: translateX(10px);
+   transition: all 0.3s ease;
+}
+
+.btn-back:hover::before {
+   opacity: 1;
+   transform: translateX(0);
+}
+
+.btn-back:hover {
+   padding-left: 2rem;
+}
+
+
 
 /* Button Container with gap */
 .button-group{
@@ -374,7 +400,7 @@ a:hover{
    .course-code{
       font-weight: 700;
       font-size: 1.125rem;
-      color: var(--primary-blue);
+      color: var(--neutral-700);
    }
 
    .course-title{
@@ -383,6 +409,7 @@ a:hover{
       margin-bottom: var(--space-sm);
       color: var(--neutral-900);
    }
+
 
    .course-description{
       font-size: 0.875rem;
@@ -394,7 +421,7 @@ a:hover{
 
    /* Full width button */
    .btn-block{
-      width: 100;
+      width: 100%;
       margin-top: auto;
    }
 
