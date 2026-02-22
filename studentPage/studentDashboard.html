@@ -5,6 +5,10 @@
         <meta name ="viewport" content="width=device-width, initial-scale=1.0">
         <title>Student Dashboard</title>
         <link rel="stylesheet" href="../css/style.css">
+        
+        
+        <!--Chart.js-->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     </head>
 
@@ -107,6 +111,41 @@
                     </div>
                  </section>
 
+                 <!-- Visual Summary -->
+
+                 <section class="mb-xl">
+                    <h2 class="mb-lg">Performative Overview</h2>
+
+                    <div class="grid grid-2">
+                        
+                        <!-- Chart 1: Course Grades -->
+                         <div class="card">
+                              <div class="card-header">
+                                <h3 class="card-title">Course Averages</h3>
+                              </div>
+                              <div class="card-body">
+                                <div class="chart-container">
+                                     <canvas id="courseGradesChart"></canvas>
+                                </div>
+                              </div>
+                         </div>
+                         
+                         
+                          <!-- Chart 2: Assessment Progress -->
+                         <div class="card">
+                              <div class="card-header">
+                                <h3 class="card-title">Assessment Progress</h3>
+                              </div>
+                              <div class="card-body">
+                                <div class="chart-container">
+                                     <canvas id="assessmentProgressChart"></canvas>
+                                </div>
+                              </div>
+                         </div>
+                    </div>
+                 </section>
+
+                 <!-- Quick Actions -->
                  <section class="mb-xl">
                     <div class="card">
                         <div class="card-body text-center">
@@ -124,6 +163,9 @@
             </div>
 
         </main>
+
+        <!-- Link to JavaScript file -->
+    <script src="studentPage.js"></script>
 
     </body>
 </html>
