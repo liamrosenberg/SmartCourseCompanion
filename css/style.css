@@ -15,6 +15,10 @@
    --neutral-700: #374151;
    --neutral-900: #111827;
    --white: #ffffff;
+
+   /* Red and green */
+   --primary-red: #ff3838;
+   --primary-green: #30d630;
   
    /* Spacing */
    --space-xs: 0.25rem;
@@ -324,6 +328,18 @@ a:hover{
    background-color: var(--neutral-200);
    border-color: var(--neutral-300);
    transform: translateY(-1px);
+   text-decoration: none;
+}
+.btn-tertiary{
+   background-color: var(--primary-green);
+   color: var(--white);
+   border: 1px solid var(--neutral-200);
+}
+
+.btn-tertiary:hover{
+   background-color: var(#a9ff8f);
+   border-color: var(--shadow-md);
+   transform: translateY(-3px);
    text-decoration: none;
 }
 

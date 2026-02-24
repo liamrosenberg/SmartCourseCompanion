@@ -4,6 +4,7 @@
     <head>
         <meta charset = "UTF-8">
         <meta name = "viewport" content = "width=device-width, initial scale=1.0">
+
         <title>Admin Page</title>
         <link rel ="stylesheet" href="../css/style.css">
     
@@ -52,15 +53,32 @@
                 <section>
                     <div class="flex-between" style="align-items: center; margin-bottom: var(--space-md);">
                         <h2 style ="margin: 0;">Course Management</h2>
+                        <a href ="courseCreate.html">
                         <button class="btn btn-primary">+ Create New Courses</button>
+                        </a>
                     </div>
-
+                    
                     <div class="assessment-list">
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title">SOEN 287: Web Programming</h3>
-                                <h4 class ="text-center">ID: S287</p>
-                                <span class="badge badge-success">Enabled</span>
+                                <h4 class ="text-center">ID:S287</p>
+
+                                <button class = "btn btn-tertiary"onclick="enableDisable(this)">Enabled</button>
+                                
+                                <script>
+                                function enableDisable(btn){
+                                    
+                                        if(btn.innerText ==='Enabled'){
+                                            btn.innerText='Disabled';
+                                            btn.style.backgroundColor = "#ff3838";
+                                        }else{
+                                            btn.innerText = "Enabled";
+                                            btn.style.backgroundColor = "#30d630";
+                                        }
+                                    }
+                                </script>
+                        
                         </div>
                         <div class="card-body">
                             <div class="grid grid-3">
@@ -81,7 +99,9 @@
                                         </div>
 
                                         <div class="button-secondary" style="margin-bottom: var(); justify-content: flex-start;">
-                                            <button class="btn btn-secondary">Edit Weightings</button>
+                                            
+                                            <button class="btn btn-secondary" >Edit Weightings</button>
+                                          
                                         </div>
                                         <div class="button-secondary" style="margin-bottom: var(--space-md); justify-content: flex-start;">
                                             <button class="btn btn-secondary">Edit Assesments</button>
