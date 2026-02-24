@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../css/style.css">
+        <title>Login/Registration</title>
+    </head>
+    <body>
+        <header>
+            <h1>Welcome to the Smart Course Companion!</h1>
+        </header>
+        <div class = "container card" id = "roleChoice">
+            <h2>Would you like to sign in as a student or as an admin?</h2>
+            <form>
+                <div class="toggle-pill">
+                    <input type="radio" id="student" name="userRole" value="student">
+                    <label for="student">Student</label>
+
+                    <input type="radio" id="admin" name="userRole" value="admin">
+                    <label for="admin">Admin</label>
+                </div>
+            </form>
+        </div>
+        <div class = "container card" id = "signInChoice">
+            <h2>Do you have an account?</h2>
+            <form>
+                <div class = "toggle-pill">
+                    <input type="radio" id="yes" name="userAction" value="yes">
+                    <label for="yes">Yes</label>   
+
+                    <input type="radio" id="no" name="userAction" value="no">
+                    <label for="no">No</label>
+                </div>
+            </form>
+        </div>
+        <div class = "container card" id = "login" style="display: none;">
+            <h2>Login</h2>
+            <form class = "button-group">
+                <input type = "text" placeholder="Username" required>
+                <input type = "password" placeholder="Password" required>
+                <input type = "submit" value = "Login" class = "btn btn-primary">
+            </form>
+        </div>
+        <div class = "container card" id = "register" style="display: none;">
+            <h2>Registration</h2>
+            <form class = "button-group">
+                <input type = "text" placeholder="Username" required>
+                <input type = "email" placeholder="Email" required>
+                <input type = "password" placeholder="Password" required>
+                <input type = "password" placeholder="Confirm Password" required>
+                <input type = "submit" value = "Register" class = "btn btn-primary">
+            </form>
+        </div>
+        <script src="landingPage.js" defer></script>
+    </body>
+</html>
