@@ -1,55 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../css/style.css">
         <title>Login/Registration</title>
+        
+        <style>
+            /* =====================================
+               SEGMENTED CONTROL (TOGGLE PILL)
+            ===================================== */
+            .toggle-pill input[type="radio"] {
+                display: none;
+            }
+            .toggle-pill {
+                display: flex;
+                border: 2px solid var(--primary-blue);
+                border-radius: 50px;
+                overflow: hidden;
+                margin-bottom: var(--space-md);
+            }
+            .toggle-pill label {
+                flex: 1;
+                text-align: center;
+                padding: var(--space-md) var(--space-lg);
+                color: var(--primary-blue);
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            .toggle-pill input[type="radio"]:checked + label {
+                background-color: var(--primary-blue);
+                color: var(--white);
+            }
+
+            /* =====================================
+               FORM INPUTS
+            ===================================== */
+            input[type="text"],
+            input[type="password"],
+            input[type="email"] {
+                width: 100%;
+                padding: var(--space-md);
+                font-size: 1rem;
+                border: 1px solid var(--neutral-200);
+                border-radius: var(--radius-md);
+                font-family: inherit;
+                transition: border-color 0.2s ease;
+                margin-bottom: var(--space-md);
+            }
+            input[type="text"]:focus,
+            input[type="password"]:focus,
+            input[type="email"]:focus {
+                outline: none;
+                border-color: var(--primary-blue);
+                box-shadow: 0 0 0 3px var(--primary-blue-light);
+            }
+
+            /* =====================================
+               MODAL OVERLAY
+            ===================================== */
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(17, 24, 39, 0.7); /* Darkened background using Raymond's neutral-900 */
+                z-index: 1000;
+                
+                /* Center the card vertically and horizontally */
+                display: none; /* Hidden by default, JS will change this to 'flex' */
+                justify-content: center;
+                align-items: center;
+                padding: var(--space-lg);
+            }
+
+            .modal-overlay .card {
+                width: 100%;
+                max-width: 450px;
+                margin: 0; 
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); 
+            }
+        </style>
     </head>
+    
     <body>
-        <header>
-            <h1>Welcome to the Smart Course Companion!</h1>
+        <header class="dashboard-header">
+            <div class="container text-center">
+                <h1>Welcome to the Smart Course Companion!</h1>
+                <p class="text-secondary">Please sign in or create an account to continue.</p>
+            </div>
         </header>
-        <div class = "container card" id = "roleChoice">
-            <h2>Would you like to sign in as a student or as an admin?</h2>
-            <form>
-                <div class="toggle-pill">
-                    <input type="radio" id="student" name="userRole" value="student">
-                    <label for="student">Student</label>
 
-                    <input type="radio" id="admin" name="userRole" value="admin">
-                    <label for="admin">Admin</label>
-                </div>
-            </form>
-        </div>
-        <div class = "container card" id = "signInChoice">
-            <h2>Do you have an account?</h2>
-            <form>
-                <div class = "toggle-pill">
-                    <input type="radio" id="yes" name="userAction" value="yes">
-                    <label for="yes">Yes</label>   
+        <main class="main-content"> 
+            <div class="container" style="max-width: 500px;">
+                
+                <div class="card" id="roleChoice">
+                    <div class="card-body">
+                        <h2 class="text-center">Sign in as:</h2>
+                        <form>
+                            <div class="toggle-pill">
+                                <input type="radio" id="student" name="userRole" value="student">
+                                <label for="student">Student</label>
 
-                    <input type="radio" id="no" name="userAction" value="no">
-                    <label for="no">No</label>
+                                <input type="radio" id="admin" name="userRole" value="admin">
+                                <label for="admin">Admin</label>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
+
+                <div class="card" id="signInChoice">
+                    <div class="card-body">
+                        <h2 class="text-center">Do you have an account?</h2>
+                        <form>
+                            <div class="toggle-pill">
+                                <input type="radio" id="yes" name="userAction" value="yes">
+                                <label for="yes">Yes</label>   
+
+                                <input type="radio" id="no" name="userAction" value="no">
+                                <label for="no">No</label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="modalOverlay" class="modal-overlay">
+            
+            <div class="card" id="login" style="display: none;">
+                <div class="card-body">
+                    <h2 class="text-center">Login</h2>
+                    <form>
+                        <input type="text" placeholder="Username" required>
+                        <input type="password" placeholder="Password" required>
+                        
+                        <div class="button-group mt-lg">
+                            <input type="submit" value="Login" class="btn btn-primary">
+                            <button type="button" class="btn btn-secondary close-modal-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card" id="register" style="display: none;">
+                <div class="card-body">
+                    <h2 class="text-center">Registration</h2>
+                    <form>
+                        <input type="text" placeholder="Username" required>
+                        <input type="email" placeholder="Email" required>
+                        <input type="password" placeholder="Password" required>
+                        <input type="password" placeholder="Confirm Password" required>
+                        
+                        <div class="button-group mt-lg">
+                            <input type="submit" value="Register" class="btn btn-primary">
+                            <button type="button" class="btn btn-secondary close-modal-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </div>
-        <div class = "container card" id = "login" style="display: none;">
-            <h2>Login</h2>
-            <form class = "button-group">
-                <input type = "text" placeholder="Username" required>
-                <input type = "password" placeholder="Password" required>
-                <input type = "submit" value = "Login" class = "btn btn-primary">
-            </form>
-        </div>
-        <div class = "container card" id = "register" style="display: none;">
-            <h2>Registration</h2>
-            <form class = "button-group">
-                <input type = "text" placeholder="Username" required>
-                <input type = "email" placeholder="Email" required>
-                <input type = "password" placeholder="Password" required>
-                <input type = "password" placeholder="Confirm Password" required>
-                <input type = "submit" value = "Register" class = "btn btn-primary">
-            </form>
-        </div>
+        
         <script src="landingPage.js" defer></script>
     </body>
 </html>
