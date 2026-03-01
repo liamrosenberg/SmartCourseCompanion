@@ -1,0 +1,23 @@
+/* =====================================
+      CHARTS STYLES
+   ===================================== */
+
+   .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+   }
+
+   .grid-2{
+      grid-template-columns: repeat(2, 1fr);
+   }
+
+   @media (max-width: 768px) {
+      .grid-2{
+         grid-template-columns: 1fr;
+      }
+   }
+
+   .mb-lg {
+      margin-bottom: var(--space-lg);
+   }
