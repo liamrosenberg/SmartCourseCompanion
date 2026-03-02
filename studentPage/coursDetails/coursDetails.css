@@ -1,0 +1,143 @@
+/* --- FULLCALENDAR MODERN FACELIFT --- */
+
+/* 1. Override the ugly default colors with Raymond's theme */
+:root {
+    --fc-border-color: var(--neutral-200); /* Softens the harsh grid lines */
+    --fc-button-bg-color: var(--primary-blue); /* Changes grey buttons to bright blue */
+    --fc-button-border-color: var(--primary-blue);
+    --fc-button-hover-bg-color: var(--primary-blue-dark);
+    --fc-button-hover-border-color: var(--primary-blue-dark);
+    --fc-today-bg-color: var(--neutral-100); /* Kills that ugly pale yellow */
+}
+
+/* 2. Make the event blocks look like modern, rounded "pills" */
+.fc-event {
+    border-radius: var(--radius-sm) !important;
+    border: none !important;
+    padding: 3px 6px !important;
+    font-weight: 500 !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+/* 3. Fix the title font so it looks like a modern app */
+.fc-toolbar-title {
+    font-weight: 600 !important;
+    color: var(--neutral-900) !important;
+    font-size: 1.5rem !important;
+}
+
+/* Break apart the glued buttons */
+.fc .fc-button-group {
+    display: flex;
+    gap: var(--space-sm); /* Adds space between grouped buttons like < and > */
+}
+
+/* Force every button to be perfectly round, overriding the "glued" flat edges */
+.fc .fc-button-group > .fc-button {
+    border-radius: var(--radius-md) !important; 
+    border: 1px solid var(--primary-blue) !important;
+}
+
+/* Add a little space between "Today" and the arrows */
+.fc-toolbar-chunk {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+}
+
+
+#calendar {
+    flex: 2; /* 2 parts of the screen */
+    background: var(--white);
+    padding: var(--space-md);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--neutral-200);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.split-screen {
+    display: flex; /* This is what forces them side-by-side */
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+}
+
+.details-panel {
+    flex: 1; /* 1 part of the screen */
+}
+
+/* Layout for the Course Selection Tabs */
+.course-filter {
+    display: flex;
+    gap: var(--space-md); /* Raymond's standard spacing variable */
+    margin-bottom: var(--space-lg); /* Pushes the calendar down a bit */
+}
+
+.tab-btn {
+    transition: all 0.2s ease-in-out; /* Makes the color swap smooth instead of jarring */
+}
+
+.btn-back {
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+/* --- DAILY TASK HOVER ANIMATIONS --- */
+
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 12px 12px 0; /* Space for the border */
+    margin-bottom: 16px;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+/* When you hover over the whole task, it slides right slightly and gets a soft background */
+.task-item:hover {
+    transform: translateX(4px);
+    background-color: #f8fafc; /* Very light slate */
+}
+
+/* The container for the buttons starts invisible (opacity 0) */
+.task-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0; 
+    transition: opacity 0.2s ease;
+}
+
+/* When you hover the task, the buttons fade in! */
+.task-item:hover .task-actions {
+    opacity: 1; 
+}
+
+/* Base style for the little buttons */
+.action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    color: var(--neutral-400); /* Gray by default */
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+/* Edit Pencil Hover: Turns blue and scales up */
+.edit-btn:hover {
+    background-color: #dbeafe;
+    color: var(--primary-blue);
+    transform: scale(1.1);
+}
+
+/* Delete Trash Hover: Turns red, scales, and gives a little shake */
+.delete-btn:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+    transform: scale(1.1) rotate(5deg);
+}

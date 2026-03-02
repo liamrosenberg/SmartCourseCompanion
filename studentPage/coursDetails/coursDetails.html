@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Manager - Smart Course Companion</title>
+
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="coursDetails.css">
+    <link rel="stylesheet" href="../../components/ToggleTheme/toggleStyle.css">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="container flex-between" style="align-items: center;">
+            
+            <div>
+                <h1>Course Details: <span id="course-title-display" class="text-primary">SOEN 287</span></h1>
+                <p class="text-secondary">Current Average: <strong id="average-display">--%</strong></p>
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <a href="../studentDashboard.html" class="btn btn-secondary btn-back">Back to Dashboard</a>
+                
+                <button class="theme-toggle" aria-label="Toggle theme">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <div id="dynamic-tabs" class="course-filter" style="display: flex; gap: 15px; margin-top: 20px; margin-bottom: 20px;"></div>
+        <div class="split-screen">
+            <div id="calendar"></div>
+    
+            <div class="details-panel">
+
+                <div id="daily-info-card" style="display: none; margin-bottom: 20px;">
+                    <div class="card">
+                        <h3 id="daily-info-header">Daily Schedule</h3>
+                        <p class="text-secondary" id="daily-info-subtitle">Tasks for...</p>
+                        <div id="daily-event-list" class="mt-lg mb-lg">
+                            <p class="text-muted">No assessments scheduled.</p>
+                        </div>
+                        <p class="btn btn-secondary btn-block" onclick="showAddAssessmentForm()">+ Add New Assessment</button></p>
+                    </div>
+                </div>
+    
+                <div id="assessment-card" style="display: none; margin-bottom: 20px;">
+                    <div class="card">
+                        <h3 id="selected-date-header">Add New Assessment</h3>
+                        <p class="text-secondary" id="selected-date-subtitle">Select a date to begin...</p>
+                        
+                        <div class="assessment-list mt-lg">
+                            <label class="stat-label">Assessment Name</label>
+                            <input type="text" class="search-input mb-sm" id="assessment-name-input" placeholder="e.g. Quiz 2">
+                            
+                            <label class="stat-label">Task Description</label>
+                            <textarea class="search-input mb-sm" id="assessment-desc-input" placeholder="e.g. Chapters 4-6, bring calculator..." rows="2" style="resize: vertical;"></textarea>
+                            
+                            <label class="stat-label">Course</label>
+                            <select class="search-input mb-sm" id="assessment-course-select"></select>
+                            
+                            <div class="mt-lg">
+                                <button class="btn btn-primary btn-block" onclick="saveNewAssessment()">Add Assessment</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="grade-card" style="display: none;">
+                    <div class="card">
+                        <h3>Add New Grade</h3>
+                        <p class="text-secondary">Enter your grades below to update your course average.</p>
+                        <div class="assessment-list mt-lg">
+                            <label class="stat-label">Evaluation Name</label>
+                            <input type="text" class="search-input mb-sm" id="grade-name-input" placeholder="e.g. Midterm 1">
+
+                            <label class="stat-label mt-sm">Earned Marks</label>
+                            <input type="number" class="search-input mb-sm" id="earned" placeholder="e.g. 85">
+
+                            <label class="stat-label mt-sm">Worth % (Total)</label>
+                            <input type="number" class="search-input mb-sm" id="total" placeholder="e.g. 100">
+
+                            <div class="mt-lg">
+                                <button class="btn btn-primary btn-block" onclick="saveNewGrade()">Save Grade</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script src="coursDetail.js"></script>
+<script src="../../components/ToggleTheme/toggle-theme.js"></script>
+</body>
+
+</html>
