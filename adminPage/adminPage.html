@@ -84,14 +84,14 @@
                             <div class="grid grid-3">
                                 <div>
                                     <h4> Assesment Weightings</h4>
-                                    <p class="text-secondary">Midterm (30%)</p>
-                                    <p class="text-secondary">Final (40%)</p>
-                                    <p class="text-secondary">Assignments (30%)</p>
+                                    <p class="text-secondary ">Midterm (<span class="weight-value" data-label="Midterm">30</span>%)</p>
+                                    <p class="text-secondary ">Final (<span class = "weight-value" data-label="Final">40</span>%)</p>
+                                    <p class="text-secondary">Assignments (<span class = "weight-value" data-label="Assignments">30</span>%)</p>
                                     </div>
-                                    <div>
+                                    <div id = "upcoming-assessments">
                                         <h4>Upcoming Assesments</h4>
-                                        <p class ="text-secondary">Deliverable 1: Frontend</p>
-                                        <p class = "text-secondary">Midterm 1: March 22nd, 10:30am</p>
+                                        <p class ="text-secondary assessment-item">Deliverable 1: Frontend</p>
+                                        <p class = "text-secondary assessment-item">Midterm 1: March 22nd, 10:30am</p>
                                         </div>
                                         <div>
                                             <h4>Current Submissions</h4>
@@ -99,14 +99,15 @@
                                         </div>
 
                                         <div class="button-secondary" style="margin-bottom: var(); justify-content: flex-start;">
-                                            
-                                            <button class="btn btn-secondary" >Edit Weightings</button>
-                                          
+                                            <button id ="edit-weightings-btn" class="btn btn-secondary" >Edit Weightings</button>
                                         </div>
                                         <div class="button-secondary" style="margin-bottom: var(--space-md); justify-content: flex-start;">
-                                            <button class="btn btn-secondary">Edit Assesments</button>
+                                            <button id="edit-assessments-btn" class="btn btn-secondary">Edit Assessments</button>
                                             
                                         </div>
+                                 </div>
+                                        
                 </section>
+                <script src="adminPage.js"></script>
     </body>
     </html>
