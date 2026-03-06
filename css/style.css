@@ -15,6 +15,10 @@
    --neutral-700: #374151;
    --neutral-900: #111827;
    --white: #ffffff;
+
+   /* Red and green */
+   --primary-red: #ff3838;
+   --primary-green: #30d630;
   
    /* Spacing */
    --space-xs: 0.25rem;
@@ -105,6 +109,7 @@ h1{
 }
 
 .card-body {
+   /* Content Inside cards */
    display: block;
 }
 
@@ -160,6 +165,9 @@ p{
 /* Dashbaord Stats */
 
 .stat-number{
+   font-size: 2.5rem;
+   font-weight: 700;
+   margin-bottom: var(--space-sm);
    font-size: 3rem;
    font-weight: 700;
    margin-bottom: var(--space-md);
@@ -294,6 +302,8 @@ a:hover{
 }
 
 .badge-info{
+   background-color: var(--primary-blue);
+   color: var(--white);
    background-color: var(--neutral-200);
    color: var(--neutral-700);
 }
@@ -338,6 +348,19 @@ a:hover{
    transform: translateY(-1px);
    text-decoration: none;
 }
+.btn-tertiary{
+   background-color: var(--primary-green);
+   color: var(--white);
+   border: 1px solid var(--neutral-200);
+}
+
+.btn-tertiary:hover{
+   background-color: var(#a9ff8f);
+   border-color: var(--shadow-md);
+   transform: translateY(-3px);
+   text-decoration: none;
+}
+
 
 /* Animated back button */
 .btn-back {
@@ -371,6 +394,7 @@ a:hover{
    gap: var(--space-md);
    flex-wrap: wrap;
    justify-content: center;
+}
 }
 
 /* =====================================

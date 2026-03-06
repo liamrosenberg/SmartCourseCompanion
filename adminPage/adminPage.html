@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+    <head>
+        <meta charset = "UTF-8">
+        <meta name = "viewport" content = "width=device-width, initial scale=1.0">
+
+        <title>Admin Page</title>
+        <link rel ="stylesheet" href="../css/style.css">
+    
+    </head>
+
+    <body>
+        <header class="dashboard-header">
+            <div class = "container flex-between" style="align-items: center;">
+                <div>
+                <h1>Admin Dashboard</h1>
+                <p class="text-secondary">Welcome back, Professor</p>
+        </header>
+
+        <main class="main-content">
+            <div class="container">
+
+                <section class="mb-x1">
+                    <div class="card">
+                        <div class="card-body">
+                            <input type="text" class="search-input" placeholder="Search Course By ID" style ="width: 100%; padding: var(--space-sm) var(--space-md); border:1px solid var(--neutral-300); border-radius: var(--radius-md); font-family: inherit; font-size: 1rem;">
+                        </div>
+                    </div>
+                </section>
+
+                <section class = "mb-xl">
+                    <h2 class ="mb-md">Student Statistics</h2>
+                    <div class = "grid grid-3">
+                        <div class="card text-center">
+                            <div class="stat-number text-primary">83.4%</div>
+                            <div class="stat-label">Average Assignment Completion</div>
+                            <p class="text-secondary mt-sm">Across all active courses</p>
+                        </div>
+                    <div class = "card text-center">
+                        <div class="stat-number text-success">15</div>
+                        <div class="stat-label">Active courses</div>
+                        <p class="text-secondary mt-sm">Currently enabled for students</p>
+                        </div>
+                    <div class="card text-center">
+                        <div class="stat-number text-warning">35%</div>
+                        <div class="stat-label">Average midterm weight</div>
+                        <p class="text-secondary mt-sm">Across all active courses</p>
+                        </div>
+                        </div>
+                </section>  
+                
+                <section>
+                    <div class="flex-between" style="align-items: center; margin-bottom: var(--space-md);">
+                        <h2 style ="margin: 0;">Course Management</h2>
+                        <a href ="courseCreate.html">
+                        <button class="btn btn-primary">+ Create New Courses</button>
+                        </a>
+                    </div>
+                    
+                    <div class="assessment-list">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">SOEN 287: Web Programming</h3>
+                                <h4 class ="text-center">ID:S287</p>
+
+                                <button class = "btn btn-tertiary"onclick="enableDisable(this)">Enabled</button>
+                                
+                                <script>
+                                function enableDisable(btn){
+                                    
+                                        if(btn.innerText ==='Enabled'){
+                                            btn.innerText='Disabled';
+                                            btn.style.backgroundColor = "#ff3838";
+                                        }else{
+                                            btn.innerText = "Enabled";
+                                            btn.style.backgroundColor = "#30d630";
+                                        }
+                                    }
+                                </script>
+                        
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-3">
+                                <div>
+                                    <h4> Assesment Weightings</h4>
+                                    <p class="text-secondary ">Midterm (<span class="weight-value" data-label="Midterm">30</span>%)</p>
+                                    <p class="text-secondary ">Final (<span class = "weight-value" data-label="Final">40</span>%)</p>
+                                    <p class="text-secondary">Assignments (<span class = "weight-value" data-label="Assignments">30</span>%)</p>
+                                    </div>
+                                    <div id = "upcoming-assessments">
+                                        <h4>Upcoming Assesments</h4>
+                                        <p class ="text-secondary assessment-item">Deliverable 1: Frontend</p>
+                                        <p class = "text-secondary assessment-item">Midterm 1: March 22nd, 10:30am</p>
+                                        </div>
+                                        <div>
+                                            <h4>Current Submissions</h4>
+                                            <p class="text-secondary">13/30 43.3%</p>
+                                        </div>
+
+                                        <div class="button-secondary" style="margin-bottom: var(); justify-content: flex-start;">
+                                            <button id ="edit-weightings-btn" class="btn btn-secondary" >Edit Weightings</button>
+                                        </div>
+                                        <div class="button-secondary" style="margin-bottom: var(--space-md); justify-content: flex-start;">
+                                            <button id="edit-assessments-btn" class="btn btn-secondary">Edit Assessments</button>
+                                            
+                                        </div>
+                                 </div>
+                                        
+                </section>
+                <script src="adminPage.js"></script>
+    </body>
+    </html>
