@@ -367,7 +367,6 @@ function saveNewGrade() {
 function updateCourseAverage(courseName) {
     const display = document.getElementById('average-display');
     
-    // --- NEW: THE "ALL COURSES" OVERALL AVERAGE ---
     if (courseName === 'All Courses' || courseName === 'All') {
         let totalPercentages = 0;
         let activeCourses = 0;
@@ -404,8 +403,7 @@ function updateCourseAverage(courseName) {
         }
         return;
     }
-
-    // --- EXISTING: INDIVIDUAL COURSE AVERAGE ---
+    
     let grades = courseGrades[courseName];
     if (!grades || grades.length === 0) {
         display.innerText = '--%';
