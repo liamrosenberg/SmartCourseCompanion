@@ -26,6 +26,7 @@
    --space-md: 1rem;
    --space-lg: 1.5rem;
    --space-xl: 2rem;
+   --space-2xl: 3rem;
 
    /* Border Radius */
    --radius-sm: 0.375rem;
@@ -58,6 +59,11 @@ body{
    max-width: 1200px;
    margin: 0 auto;
    padding: 0 var(--space-lg);
+}
+
+.flex-between{
+   display: flex;
+   justify-content: space-between;
 }
 
 /* Header at the top */
@@ -104,6 +110,7 @@ h1{
 
 .card-body {
    /* Content Inside cards */
+   display: block;
 }
 
 /* For centered content in cards */
@@ -161,6 +168,15 @@ p{
    font-size: 2.5rem;
    font-weight: 700;
    margin-bottom: var(--space-sm);
+   font-size: 3rem;
+   font-weight: 700;
+   margin-bottom: var(--space-md);
+   line-height: 1;
+}
+
+/* More padding for stat cards */
+.stat-card {
+   padding: var(--space-xl);
 }
 
 .stat-label{
@@ -288,6 +304,8 @@ a:hover{
 .badge-info{
    background-color: var(--primary-blue);
    color: var(--white);
+   background-color: var(--neutral-200);
+   color: var(--neutral-700);
 }
 
 /* BUTTONS */
@@ -343,6 +361,33 @@ a:hover{
    text-decoration: none;
 }
 
+
+/* Animated back button */
+.btn-back {
+   position: relative;
+   transition: all 0.3s ease;
+}
+
+.btn-back::before {
+   content: '← ';
+   position: absolute;
+   left: 0.5rem;
+   opacity: 0;
+   transform: translateX(10px);
+   transition: all 0.3s ease;
+}
+
+.btn-back:hover::before {
+   opacity: 1;
+   transform: translateX(0);
+}
+
+.btn-back:hover {
+   padding-left: 2rem;
+}
+
+
+
 /* Button Container with gap */
 .button-group{
    display: flex;
@@ -350,3 +395,74 @@ a:hover{
    flex-wrap: wrap;
    justify-content: center;
 }
+}
+
+/* =====================================
+      COURSE BROWSE PAGE STYLES
+   ===================================== */
+
+   /* Search Input */
+   .search-input{
+      width: 100%;
+      padding: var(--space-md);
+      font-size: 1rem;
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      transition: border-color 0.2s ease;
+
+   }
+
+   .search-input:focus{
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px var(--primary-blue-light);
+   }
+
+   /* Course Card Style */
+   .course-card{
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+   }
+
+   .course-header{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+   }
+
+   .course-code{
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--neutral-700);
+   }
+
+   .course-title{
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+      color: var(--neutral-900);
+   }
+
+
+   .course-description{
+      font-size: 0.875rem;
+      color: var(--neutral-600);
+      margin-bottom: var(--space-lg);
+      flex-grow: 1;
+      line-height: 1.6;
+   }
+
+   /* Full width button */
+   .btn-block{
+      width: 100%;
+      margin-top: auto;
+   }
+
+   /* Utility for top margin */
+   .mt-xl{
+      margin-top: var(--space-xl);
+   }
+   
