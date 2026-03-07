@@ -64,3 +64,34 @@ closeButtons.forEach(function(button) {
     // Adds an event listener that runs the 'closeModal' function whenever a cancel button is clicked
     button.addEventListener('click', closeModal);
 });
+
+// Select the forms using the IDs we just added
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+
+// Create a function to handle the redirection
+function handleAuthentication(event) {
+    // Prevent the default form submission (which just refreshes the page)
+    event.preventDefault(); 
+
+    // Find out which role the user selected
+    const userRole = document.querySelector('input[name="userRole"]:checked');
+
+    if (userRole) {
+        // Redirect based on the selected value and your folder structure
+        if (userRole.value === "admin") {
+            window.location.href = "../adminPage/adminPage.html";
+        } else if (userRole.value === "student") {
+            window.location.href = "../studentPage/studentDashboard.html";
+        }
+    }
+}
+
+// Attach this function to both forms when the user clicks 'Login' or 'Register'
+if (loginForm) {
+    loginForm.addEventListener('submit', handleAuthentication);
+}
+
+if (registerForm) {
+    registerForm.addEventListener('submit', handleAuthentication);
+}
