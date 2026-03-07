@@ -69,6 +69,7 @@
 /* Layout for the Course Selection Tabs */
 .course-filter {
     display: flex;
+    justify-content: center;
     gap: var(--space-md); /* Raymond's standard spacing variable */
     margin-bottom: var(--space-lg); /* Pushes the calendar down a bit */
 }
