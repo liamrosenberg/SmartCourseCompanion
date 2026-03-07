@@ -57,6 +57,11 @@ body{
    padding: 0 var(--space-lg);
 }
 
+.flex-between{
+   display: flex;
+   justify-content: space-between;
+}
+
 /* Header at the top */
 .dashboard-header{
    background: var(--white);
@@ -436,29 +441,4 @@ a:hover{
    .mt-xl{
       margin-top: var(--space-xl);
    }
-
-   /* =====================================
-      CHARTS STYLES
-   ===================================== */
-
-   .chart-container {
-      position: relative;
-      height: 300px;
-      width: 100%;
-   }
-
-   .grid-2{
-      grid-template-columns: repeat(2, 1fr);
-   }
-
-   @media (max-width: 768px) {
-      .grid-2{
-         grid-template-columns: 1fr;
-      }
-   }
-
-   .mb-lg {
-      margin-bottom: var(--space-lg);
-   }
-
-      
+   

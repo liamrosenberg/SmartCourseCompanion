@@ -10,16 +10,19 @@
             /* =====================================
                SEGMENTED CONTROL (TOGGLE PILL)
             ===================================== */
+            /* Hides the default radio button circle so we can style the label instead */
             .toggle-pill input[type="radio"] {
                 display: none;
             }
+            /* Container for the segmented control, using flexbox for layout */
             .toggle-pill {
                 display: flex;
                 border: 2px solid var(--primary-blue);
-                border-radius: 50px;
+                border-radius: var(--radius-md);
                 overflow: hidden;
                 margin-bottom: var(--space-md);
             }
+            /* Styles the clickable labels to look like buttons within the pill */
             .toggle-pill label {
                 flex: 1;
                 text-align: center;
@@ -29,6 +32,7 @@
                 cursor: pointer;
                 transition: all 0.2s ease;
             }
+            /* Changes the background and text color of the label when its associated radio button is checked */
             .toggle-pill input[type="radio"]:checked + label {
                 background-color: var(--primary-blue);
                 color: var(--white);
@@ -37,6 +41,7 @@
             /* =====================================
                FORM INPUTS
             ===================================== */
+            /* Base styles for text, password, and email input fields */
             input[type="text"],
             input[type="password"],
             input[type="email"] {
@@ -49,6 +54,7 @@
                 transition: border-color 0.2s ease;
                 margin-bottom: var(--space-md);
             }
+            /* Styles applied when an input field is clicked/focused (adds a blue outline/shadow) */
             input[type="text"]:focus,
             input[type="password"]:focus,
             input[type="email"]:focus {
@@ -60,6 +66,7 @@
             /* =====================================
                MODAL OVERLAY
             ===================================== */
+            /* The dark, semi-transparent background that covers the whole screen behind the modal */
             .modal-overlay {
                 position: fixed;
                 top: 0;
@@ -68,12 +75,23 @@
                 height: 100%;
                 background-color: rgba(17, 24, 39, 0.7);
                 z-index: 1000;
-                display: none;
+                display: flex; 
                 justify-content: center;
                 align-items: center;
                 padding: var(--space-lg);
+                /* Hidden by default using opacity and visibility */
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
             }
 
+            /* Class added via JavaScript to reveal the modal */
+            .modal-overlay.show-modal {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            /* Specific styles for the card container when it is inside the modal overlay */
             .modal-overlay .card {
                 width: 100%;
                 max-width: 450px;
