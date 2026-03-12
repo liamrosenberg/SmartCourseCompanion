@@ -1,21 +1,20 @@
-// Selects the HTML element with the ID 'modalOverlay' and stores it in a constant variable
 const modalOverlay = document.getElementById('modalOverlay');
 
-// Defines a function to check which radio buttons the user has selected
+// Check user selection
 function checkSelections() {
-    // Finds the currently checked radio button for the user role (Student or Admin)
+    // Current selected user role
     const userRole = document.querySelector('input[name="userRole"]:checked');
     
-    // Finds the currently checked radio button for the user action (Yes or No to having an account)
+    // Current selected user action
     const userAction = document.querySelector('input[name="userAction"]:checked');
 
-    // Checks if BOTH a user role and a user action have been selected by the user
+    // Checks if both user action and user role
     if (userRole && userAction) {
         
         // Adds the 'show-modal' CSS class to the modal overlay, triggering its visibility on screen
         modalOverlay.classList.add('show-modal');
 
-        // Checks if the user indicated they already have an account (value equals "yes")
+        // Checks if the user indicated they already have an account
         if (userAction.value === "yes") {
             // Displays the login form by setting its CSS display property to 'block'
             document.getElementById("login").style.display = "block";
@@ -65,20 +64,20 @@ closeButtons.forEach(function(button) {
     button.addEventListener('click', closeModal);
 });
 
-// Select the forms using the IDs we just added
+// Select the forms using the IDs
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 
-// Create a function to handle the redirection
+// Function to handle the redirection
 function handleAuthentication(event) {
-    // Prevent the default form submission (which just refreshes the page)
+    // Prevent the default form submission
     event.preventDefault(); 
 
-    // Find out which role the user selected
+    // Determine which role the user selected
     const userRole = document.querySelector('input[name="userRole"]:checked');
 
     if (userRole) {
-        // Redirect based on the selected value and your folder structure
+        // Redirect based on the selected value
         if (userRole.value === "admin") {
             window.location.href = "../adminPage/adminPage.html";
         } else if (userRole.value === "student") {
