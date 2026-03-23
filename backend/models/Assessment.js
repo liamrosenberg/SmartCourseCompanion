@@ -12,7 +12,7 @@ const assessmentSchema = new mongoose.Schema({
     dueDate: { type: Date },
     earnedMarks: { type: Number, min: 0}, // Earned marks means like the actual grade received
     totalMarks: { type: Number, min: 1}, // Total marks means like the highest possible grade
-    isCompleted: { type: Boolean, default: false },
+    isCompleted: { type: Boolean, default: false }, 
 }, { timestamps: true });
 
 const Assessment = mongoose.model('Assessment', assessmentSchema);
