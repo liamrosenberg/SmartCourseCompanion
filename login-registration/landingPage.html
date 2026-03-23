@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/landingPage.css">
+        <link rel="stylesheet" href="../components/ToggleTheme/toggleStyle.css">
+        <title>Login/Registration</title>
+        
+        <style>
+            
+            /* Hides the default radio button circle so we can style the label instead */
+            .toggle-pill input[type="radio"] {
+                display: none;
+            }
+            /* Container for the segmented control, using flexbox for layout */
+            .toggle-pill {
+                display: flex;
+                border: 2px solid var(--primary-blue);
+                border-radius: var(--radius-md);
+                overflow: hidden;
+                margin-bottom: var(--space-md);
+            }
+            /* Styles the clickable labels to look like buttons within the pill */
+            .toggle-pill label {
+                flex: 1;
+                text-align: center;
+                padding: var(--space-md) var(--space-lg);
+                color: var(--primary-blue);
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            /* Changes the background and text color of the label when its associated radio button is checked */
+            .toggle-pill input[type="radio"]:checked + label {
+                background-color: var(--primary-blue);
+                color: var(--white);
+            }
+
+            /* Base styles for text, password, and email input fields */
+            input[type="text"],
+            input[type="password"],
+            input[type="email"] {
+                width: 100%;
+                padding: var(--space-md);
+                font-size: 1rem;
+                border: 1px solid var(--neutral-200);
+                border-radius: var(--radius-md);
+                font-family: inherit;
+                transition: border-color 0.2s ease;
+                margin-bottom: var(--space-md);
+            }
+            /* Styles applied when an input field is clicked/focused (adds a blue outline/shadow) */
+            input[type="text"]:focus,
+            input[type="password"]:focus,
+            input[type="email"]:focus {
+                outline: none;
+                border-color: var(--primary-blue);
+                box-shadow: 0 0 0 3px var(--primary-blue-light);
+            }
+
+            /* The dark, semi-transparent background that covers the whole screen behind the modal */
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(17, 24, 39, 0.7);
+                z-index: 1000;
+                display: flex; 
+                justify-content: center;
+                align-items: center;
+                padding: var(--space-lg);
+                /* Hidden by default using opacity and visibility */
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+
+            /* Class added via JavaScript to reveal the modal */
+            .modal-overlay.show-modal {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            /* Specific styles for the card container when it is inside the modal overlay */
+            .modal-overlay .card {
+                width: 100%;
+                max-width: 450px;
+                margin: 0; 
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); 
+            }
+        </style>
+    </head>
+    
+    <body>
+        <header class="dashboard-header">
+    <div class="container flex-between" style="align-items: center;">
+        <div>
+            <h1>Welcome to the Smart Course Companion!</h1>
+            <p class="text-secondary">Please sign in or create an account to continue.</p>
+        </div>
+        <div id="toggle-slot"></div>
+        
+    </div>
+</header>
+
+        <main class="main-content"> 
+            <div class="container" style="max-width: 500px;">
+                
+                <div class="card" id="roleChoice">
+                    <div class="card-body">
+                        <h2 class="text-center">Sign in as:</h2>
+                        <form>
+                            <div class="toggle-pill">
+                                <input type="radio" id="student" name="userRole" value="student">
+                                <label for="student">Student</label>
+
+                                <input type="radio" id="admin" name="userRole" value="admin">
+                                <label for="admin">Admin</label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card" id="signInChoice">
+                    <div class="card-body">
+                        <h2 class="text-center">Do you have an account?</h2>
+                        <form>
+                            <div class="toggle-pill">
+                                <input type="radio" id="yes" name="userAction" value="yes">
+                                <label for="yes">Yes</label>   
+
+                                <input type="radio" id="no" name="userAction" value="no">
+                                <label for="no">No</label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="modalOverlay" class="modal-overlay">
+            
+            <div class="card" id="login" style="display: none;">
+                <div class="card-body">
+                    <h2 class="text-center">Login</h2>
+                    <form id = "loginForm">
+                        <input type="text" placeholder="Username" required>
+                        <input type="password" placeholder="Password" required>
+                        
+                        <div class="button-group mt-lg">
+                            <input type="submit" value="Login" class="btn btn-primary">
+                            <button type="button" class="btn btn-secondary close-modal-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card" id="register" style="display: none;">
+                <div class="card-body">
+                    <h2 class="text-center">Registration</h2>
+                    <form id ="registerForm">
+                        <input type="text" placeholder="Username" required>
+                        <input type="email" placeholder="Email" required>
+                        <input type="password" placeholder="Password" required>
+                        <input type="password" placeholder="Confirm Password" required>
+                        
+                        <div class="button-group mt-lg">
+                            <input type="submit" value="Register" class="btn btn-primary">
+                            <button type="button" class="btn btn-secondary close-modal-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        
+        <script src="landingPage.js" defer></script>
+        <script src="../components/ToggleTheme/toggle-theme.js"></script>
+    </body>
+</html>

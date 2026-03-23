@@ -26,11 +26,30 @@ document.addEventListener('DOMContentLoaded', function() {
             </button>`;
     }
 
-    // Wire up the toggle
     const themeToggle = document.querySelector('.theme-toggle');
+    
+    // 1. CHECK FOR SAVED THEME ON PAGE LOAD
+    const currentTheme = localStorage.getItem('siteTheme');
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (themeToggle) themeToggle.classList.add('active'); // Set button to moon
+    }
+
+    // 2. WIRE UP THE CLICK EVENT
     if (themeToggle) {
         themeToggle.addEventListener('click', function() {
+            // Toggle the button animation
             this.classList.toggle('active');
+            
+            // Toggle the dark-mode class on the entire page body
+            document.body.classList.toggle('dark-mode');
+            
+            // Save the user's preference to the browser's memory
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('siteTheme', 'dark');
+            } else {
+                localStorage.setItem('siteTheme', 'light');
+            }
         });
     }
 
