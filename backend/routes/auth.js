@@ -7,70 +7,64 @@ const jwt = require('jsonwebtoken');
 // POST: Register a new user
 router.post('/register', async (req, res) => {
     try {
-        // 1. Grab the data sent from the frontend
-        const { username, email, password, role } = req.body;
+        // Log the incoming data so you can see it in your backend terminal
+        console.log("Registration attempt with data:", req.body);
 
-        // 2. Check if a user with this email already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'User with this email already exists.' });
+        // 1. Destructure the expected fields from the frontend request
+        // (Adjust these fields if your frontend sends different names)
+        const { username, firstName, lastName, email, password, role } = req.body;
+
+        // 2. Catch Missing Data Early
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password are required." });
         }
 
-        // 3. Hash the password for security
+        // 3. Check if user already exists to prevent MongoDB E11000 crashes
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "An account with this email already exists." });
+        }
+
+        // 4. Hash the password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // 4. Create the new user object
+        // 5. Create the new user object
         const newUser = new User({
-            username,
+            username: username,
+            firstName: firstName,
+            lastName: lastName,
             email,
             password: hashedPassword,
-            role: role || 'student' // Default to student if no role is provided
+            role: role || 'student', // Fallback if role isn't provided
         });
 
-        // 5. Save the user to MongoDB
+        // 6. Save to the database
         await newUser.save();
 
-        res.status(201).json({ message: 'User registered successfully!' });
+        // 7. Send success back to landingPage.js
+        res.status(201).json({ message: "Registration successful!" });
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error during registration.' });
+        console.error("🔥 Registration Server Error:", error);
+        
+        // Handle Mongoose Schema Validation Errors (e.g., a required field is missing in your schema)
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({ message: "Validation Error", errors: messages });
+        }
+        
+        // Handle MongoDB Duplicate Key Error (just in case the findOne check misses a race condition)
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyValue)[0];
+            return res.status(400).json({ message: `An account with that ${field} already exists.` });
+        }
+
+        // Generic Server Error (Frontend will now at least get a JSON response)
+        res.status(500).json({ message: "Internal server error. Check the backend terminal." });
     }
 });
 
-// POST: Login an existing user
-router.post('/login', async (req, res) => {
-    try {
-        // 1. Accept username instead of email from req.body
-        const { username, password } = req.body;
-
-        // 2. Find the user by username
-        const user = await User.findOne({ username });
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials.' });
-        }
-
-        // 3. Check password (existing logic)
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials.' });
-        }
-
-        // ... (rest of your JWT generation logic remains the same)
-        const payload = { userId: user._id, role: user.role };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        res.status(200).json({
-            message: 'Login successful!',
-            token,
-            user: { id: user._id, username: user.username, role: user.role }
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error during login.' });
-    }
-});
+// (Keep your existing router.post('/login', ...) route down here)
 
 module.exports = router;
