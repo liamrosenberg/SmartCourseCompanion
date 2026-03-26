@@ -42,41 +42,29 @@ router.post('/register', async (req, res) => {
 // POST: Login an existing user
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        // 1. Accept username instead of email from req.body
+        const { username, password } = req.body;
 
-        // 1. Check if the user exists
-        const user = await User.findOne({ email });
+        // 2. Find the user by username
+        const user = await User.findOne({ username });
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
-        // 2. Check if the password is correct
+        // 3. Check password (existing logic)
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
-        // 3. Generate the JWT (The Digital Wristband)
-        const payload = {
-            userId: user._id,
-            role: user.role
-        };
+        // ... (rest of your JWT generation logic remains the same)
+        const payload = { userId: user._id, role: user.role };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        const token = jwt.sign(
-            payload,
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' } // Token expires in 1 hour for security
-        );
-
-        // 4. Send the token and user info back to the frontend
         res.status(200).json({
             message: 'Login successful!',
-            token: token,
-            user: { 
-                id: user._id, 
-                username: user.username, 
-                role: user.role 
-            }
+            token,
+            user: { id: user._id, username: user.username, role: user.role }
         });
 
     } catch (error) {
