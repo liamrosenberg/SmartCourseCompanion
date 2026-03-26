@@ -465,4 +465,14 @@ a:hover{
    .mt-xl{
       margin-top: var(--space-xl);
    }
-   
+   /*new colored buttons for add/remove assessments */
+.btn-danger {
+   background-color: var(--primary-red);
+   color: var(--white);
+}
+
+.btn-danger:hover {
+   background-color: #cc0000;
+   transform: translateY(-1px);
+   box-shadow: var(--shadow-sm);
+}

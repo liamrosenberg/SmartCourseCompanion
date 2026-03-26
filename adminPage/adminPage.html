@@ -88,11 +88,20 @@
                                     <p class="text-secondary ">Final (<span class = "weight-value" data-label="Final">40</span>%)</p>
                                     <p class="text-secondary">Assignments (<span class = "weight-value" data-label="Assignments">30</span>%)</p>
                                     </div>
-                                    <div id = "upcoming-assessments">
-                                        <h4>Upcoming Assesments</h4>
-                                        <p class ="text-secondary assessment-item">Deliverable 1: Frontend</p>
-                                        <p class = "text-secondary assessment-item">Midterm 1: March 22nd, 10:30am</p>
-                                        </div>
+                                   <div id="upcoming-assessments">
+                                <h4>Upcoming Assessments</h4>
+                             <div class="assessment-row flex-between" style="align-items: center; margin-bottom: var(--space-sm);">
+                            <p class="text-secondary assessment-item" style="margin: 0;">Deliverable 1: Frontend</p>
+                             <button class="btn btn-danger remove-btn" style="display: none; padding: 2px 8px;">X</button>
+                                </div>
+    
+                            <div class="assessment-row flex-between" style="align-items: center; margin-bottom: var(--space-sm);">
+                             <p class="text-secondary assessment-item" style="margin: 0;">Midterm 1: March 22nd, 10:30am</p>
+                                <button class="btn btn-danger remove-btn" style="display: none; padding: 2px 8px;">X</button>
+                             </div>
+
+                            <button id="add-assessment-btn" class="btn btn-secondary mt-sm" style="display: none; width: 100%;">+ Add New Assessment</button>
+                            </div>
                                         <div>
                                             <h4>Current Submissions</h4>
                                             <p class="text-secondary">13/30 43.3%</p>
