@@ -56,7 +56,7 @@ async function handleLogin(event) {
         const response = await fetch('http://localhost:5000/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, role: userRole })
         });
 
         const data = await response.json();

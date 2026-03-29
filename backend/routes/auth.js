@@ -76,11 +76,11 @@ router.post('/login', async (req, res) => {
 
         // 👉 1. THIS PREVENTS THE CRASH: We add "|| {}" so if req.body is completely missing, 
         // the server just sees a blank object instead of crashing trying to read 'undefined'.
-        const { username, password } = req.body || {}; 
+        const { username, password, role } = req.body || {}; 
 
         // 2. Catch missing data early
-        if (!username || !password) {
-            return res.status(400).json({ message: "Username and password are required." });
+        if (!username || !password || !role) {
+            return res.status(400).json({ message: "Username, password, and role are required." });
         }
 
         // 👉 3. HERE IS THE OPERATION! We ask MongoDB to find the user.
@@ -88,6 +88,10 @@ router.post('/login', async (req, res) => {
         
         if (!user) {
             return res.status(400).json({ message: "User not found. Please register first." });
+        }
+
+        if (user.role !== role) {
+            return res.status(403).json({ message: `Access denied. You are not registered as an ${role}.` });
         }
 
         // 4. Compare the typed password with the hashed password in the database
