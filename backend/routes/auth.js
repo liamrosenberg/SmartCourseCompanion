@@ -66,5 +66,53 @@ router.post('/register', async (req, res) => {
 });
 
 // (Keep your existing router.post('/login', ...) route down here)
+router.post('/login', async (req, res) => {
+    try {
+        console.log("Login attempt with data:", req.body);
 
+        // 👉 1. THIS PREVENTS THE CRASH: We add "|| {}" so if req.body is completely missing, 
+        // the server just sees a blank object instead of crashing trying to read 'undefined'.
+        const { username, password } = req.body || {}; 
+
+        // 2. Catch missing data early
+        if (!username || !password) {
+            return res.status(400).json({ message: "Username and password are required." });
+        }
+
+        // 👉 3. HERE IS THE OPERATION! We ask MongoDB to find the user.
+        const user = await User.findOne({ username: username });
+        
+        if (!user) {
+            return res.status(400).json({ message: "User not found. Please register first." });
+        }
+
+        // 4. Compare the typed password with the hashed password in the database
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid credentials." });
+        }
+
+        // 5. Create a token (so the user stays logged in)
+        const token = jwt.sign(
+            { id: user._id, role: user.role }, 
+            process.env.JWT_SECRET || 'fallback_secret_key', 
+            { expiresIn: '1h' }
+        );
+
+        // 6. Send the success response back to landingPage.js!
+        res.status(200).json({
+            message: "Login successful",
+            token,
+            user: {
+                id: user._id,
+                username: user.username,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        console.error("🔥 Login Server Error:", error);
+        res.status(500).json({ message: "Internal server error during login." });
+    }
+});
 module.exports = router;
