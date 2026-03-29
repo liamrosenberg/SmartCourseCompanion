@@ -20,9 +20,13 @@ router.post('/register', async (req, res) => {
         }
 
         // 3. Check if user already exists to prevent MongoDB E11000 crashes
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
             return res.status(400).json({ message: "An account with this email already exists." });
+        }
+        const existingUsername = await User.findOne({ username });
+        if (existingUsername) {
+            return res.status(400).json({ message: "This username is already taken. Please choose another." });
         }
 
         // 4. Hash the password
