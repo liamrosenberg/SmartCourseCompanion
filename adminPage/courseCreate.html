@@ -1,97 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset = "UTF-8">
-        <meta name = "viewport" content = "width=device-width, initial scale=1.0">
-        <title>Course Creation</title>
-        <link rel ="stylesheet" href="../css/style.css">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Creation</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../components/ToggleTheme/toggleStyle.css">
+</head>
 
-    <body>
-        <header class="dashboard-header">
-            <div class = "container flex-between" style="align-items: center;">
-                <div>
+<body>
+    <header class="dashboard-header">
+        <div class="container flex-between" style="align-items: center;">
+            <div>
                 <h1>Course Creation</h1>
                 <p class="text-secondary">Set Up New Courses For Students.</p>
-                </div>
-                <div>
-                    <a href="adminPage.html" class="btn btn-secondary">← Back to Dashboard</a>
-                </div>
-                </div>
-        </header>
-<form>
-        <main class="main-content">
-            <div class = "container">
-                
-                <section class="mb-x1">
+            </div>
+            <div>
+                <a href="adminPage.html" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+            <div id="toggle-slot"></div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="mb-x1">
+                <form> 
                     <div class="card">
                         <div class="card-body">
            
                             <h3 style="border-bottom: 1px solid var(--neutral-200); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">Basic Information</h3>
                             
-                            <div class="grid grid-3" style="margin-bottom: var(--space-lg);">
-                                    <div style = "grid-column: span 2;">
-                                        <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Course Name</label>
-                                        <input type="text" placeholder="e.g. Intro to Computer Science" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Course Code</label>
-                                <input type="text" placeholder="e.g. CS101" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit;">
-                            </div>
-                        </div>
-
-                        <h3 style="border-bottom: 1px solid var(--neutral-200); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">Define Assessment Weightings</h3>
-                        
-                        <div class="flex-between" style="gap: var(--space-md); margin-bottom: var(--space-md);">
-
-                            <div style="flex: 1;">
-                                <label style="display: block; font-size: 0.875rem; margin-bottom: var(--space-xs);">Category 1 (e.g. Midterm)</label>
-                                <input type="text" placeholder="Category Name" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); margin-bottom: var(--space-xs);">
-                                <input type="number" placeholder="Weight (%)" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">
+                            <div class="grid grid-3" style="margin-bottom: var(--space-lg); gap: var(--space-md);">
+                                <div>
+                                    <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Course Name</label>
+                                    <input type="text" id="courseNameInput" placeholder="e.g. Intro to Computer Science" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit;" required>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Course Code</label>
+                                    <input type="text" id="courseCodeInput" placeholder="e.g. CS101" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit;" required>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Instructor Name</label>
+                                    <input type="text" id="instructorInput" placeholder="e.g. Dr. Smith" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit;" required>
+                                </div>
                             </div>
 
-                            <div style="flex: 1;">
-                                <label style="display: block; font-size: 0.875rem; margin-bottom: var(--space-xs);">Category 2 (e.g. Final)</label>
-                                <input type="text" placeholder="Category Name" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); margin-bottom: var(--space-xs);">
-                                <input type="number" placeholder="Weight (%)" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">
-                            </div>
-
-                            <div style="flex: 1;">
-                                <label style="display: block; font-size: 0.875rem; margin-bottom: var(--space-xs);">Category 3 (e.g. Labs)</label>
-                                <input type="text" placeholder="Category Name" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); margin-bottom: var(--space-xs);">
-                                <input type="number" placeholder="Weight (%)" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">
-                            </div>
-
-                        </div>
-
-                        <h3 style="border-bottom: 1px solid var(--neutral-200); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">Settings</h3>
-
-                        <div class="grid grid-3" style="margin-bottom: var(--space-lg);">
-                            <div style="grid-column: span 2;">
-                                <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Reusable Course Structure</label>
-
-                                <select style="width: 60%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit; background: white;">
-                                    <option value="none">-- Select a Template --</option>
-                                    <option value="template1">Standard 12-Week Course</option>
-                                    <option value="template2">Project-Based Syllabus</option>
-                                    <option value="template3">Blank Canvas</option>
-                                    
-                                </select>
-                            </div>
+                            <h3 style="border-bottom: 1px solid var(--neutral-200); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">Define Assessment Weightings</h3>
                             
-                        </div>
+                            <div class="flex-between" style="gap: var(--space-md); margin-bottom: var(--space-md);">
+                                <div style="flex: 1;">
+                                    <label style="display: block; font-size: 0.875rem; margin-bottom: var(--space-xs);">Category 1 (Midterm)</label>
+                                    <input type="number" id="midtermWeight" placeholder="Weight (%)" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">
+                                </div>
 
-                        <div class="button-group" style="justify-content: flex-end; border-top: 1px solid var(--neutral-200); padding-top: var(--space-md);">
-                            <button type="reset" class="btn btn-secondary">Clear Selections</button>
-                            <button type="submit" class="btn btn-primary">Create Course</button>
-                        </div>
+                                <div style="flex: 1;">
+                                    <label style="display: block; font-size: 0.875rem; margin-bottom: var(--space-xs);">Category 2 (Final)</label>
+                                    <input type="number" id="finalWeight" placeholder="Weight (%)" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">
+                                </div>
 
+                                <div style="flex: 1;">
+                                    <label style="display: block; font-size: 0.875rem; margin-bottom: var(--space-xs);">Category 3 (Assignments/Labs)</label>
+                                    <input type="number" id="assignmentWeight" placeholder="Weight (%)" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">
+                                </div>
+                            </div>
+
+                            <h3 style="border-bottom: 1px solid var(--neutral-200); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">Settings</h3>
+
+                            <div class="grid grid-3" style="margin-bottom: var(--space-lg);">
+                                <div style="grid-column: span 2;">
+                                    <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Reusable Course Structure</label>
+                                    <select style="width: 60%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit; background: white;">
+                                        <option value="none">-- Select a Template --</option>
+                                        <option value="template1">Standard 12-Week Course</option>
+                                        <option value="template2">Project-Based Syllabus</option>
+                                        <option value="template3">Blank Canvas</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="button-group" style="justify-content: flex-end; border-top: 1px solid var(--neutral-200); padding-top: var(--space-md);">
+                                <button type="reset" class="btn btn-secondary">Clear Selections</button>
+                                <button type="submit" class="btn btn-primary">Create Course</button>
+                            </div>
+
+                        </div>
                     </div>
-                </form>
-            </section>
-
+                </form> 
+                </section>
         </div>
-    </form>
     </main> 
-    </body>
-    </html>
+
+    <script src="../components/ToggleTheme/toggle-theme.js"></script>
+    <script src="courseCreate.js"></script>
+</body>
+</html>

@@ -395,7 +395,6 @@ a:hover{
    flex-wrap: wrap;
    justify-content: center;
 }
-}
 
 /* =====================================
       COURSE BROWSE PAGE STYLES
@@ -465,4 +464,45 @@ a:hover{
    .mt-xl{
       margin-top: var(--space-xl);
    }
+   /*new colored buttons for add/remove assessments */
+.btn-danger {
+   background-color: var(--primary-red);
+   color: var(--white);
+}
+
+.btn-danger:hover {
+   background-color: #cc0000;
+   transform: translateY(-1px);
+   box-shadow: var(--shadow-sm);
+}
    
+   /* =====================================
+   DARK MODE OVERRIDES
+===================================== */
+body.dark-mode {
+    /* Swap background to dark gray, and cards to slightly lighter dark gray */
+    --neutral-50: #111827; 
+    --white: #1f2937;      
+
+    /* Swap borders to be darker */
+    --neutral-100: #374151;
+    --neutral-200: #374151; 
+    --neutral-300: #4b5563; 
+
+    /* Invert text colors so they show up on dark backgrounds */
+    --neutral-600: #9ca3af; /* Secondary text */
+    --neutral-700: #e5e7eb; /* Primary text */
+    --neutral-900: #f9fafb; /* Headings */
+
+    /* Make the primary blue slightly brighter for contrast against dark backgrounds */
+    --primary-blue: #3b82f6; 
+    --primary-blue-dark: #60a5fa;
+    --primary-blue-light: #1e3a8a;
+}
+
+/* Ensure the calendar integrates nicely with dark mode */
+body.dark-mode .fc-theme-standard td, 
+body.dark-mode .fc-theme-standard th,
+body.dark-mode .fc-theme-standard .fc-scrollgrid {
+    border-color: var(--neutral-300);
+}
