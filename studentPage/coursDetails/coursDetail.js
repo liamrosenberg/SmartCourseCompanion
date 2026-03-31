@@ -1,13 +1,7 @@
 // GLOBAL SCOPE: All functions can see these
-const myCourses = ["SOEN 287", "COMP 249", "ENGR 233", "ENGR 213", "MATH 205"];
+let myCourses = [];
 // This acts as the bridge between your page
-let courseGrades = JSON.parse(localStorage.getItem('sharedCourseGrades')) || {
-    "SOEN 287": [],
-    "COMP 249": [],
-    "ENGR 233": [],
-    "ENGR 213": [],
-    "MATH 205": []
-};
+let courseGrades = {};
 let calendar; 
 
 //specific course colors
@@ -21,13 +15,37 @@ const courseColors = {
 };
 
 //master array with all the classes 
-let allAssessments = [
-    { name: 'Quiz 1', date: '2026-03-05', course: 'SOEN 287' },
-    { name: 'Midterm', date: '2026-03-12', course: 'COMP 249' },
-    { name: 'Assignment 1', date: '2026-03-20', course: 'ENGR 233' }
-];
+let allAssessments = [];
+
+async function loadDataFromServer() {
+    const token = localStorage.getItem('token'); // Get Liam's login token
+    
+    try {
+        // 1. Fetch Assessments for the Calendar
+        const res = await fetch('http://localhost:5000/api/assessments', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        allAssessments = await res.json();
+
+        // 2. Fetch Courses for your Tabs
+        const courseRes = await fetch('http://localhost:5000/api/courses', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const coursesData = await courseRes.json();
+        myCourses = coursesData.map(c => c.courseCode);
+
+        // 3. Refresh the UI
+        populateTabs();
+        populateCourseDropdown();
+        updateCalendarView('All Courses');
+
+    } catch (err) {
+        console.error("Failed to load data:", err);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function() {
+    loadDataFromServer();
     populateCourseDropdown();
     populateTabs();
     
@@ -88,7 +106,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCalendarView('All Courses');
 });
 
-function saveNewAssessment() {
+async function saveNewAssessment() {
+    const token = localStorage.getItem('token');
     const assessmentCard = document.getElementById('assessment-card');
     const name = document.getElementById('assessment-name-input').value;
     const desc = document.getElementById('assessment-desc-input').value; 
@@ -100,63 +119,35 @@ function saveNewAssessment() {
         return;
     }
 
-    // 1. Push to master array
-    allAssessments.push({
-        name: name,
-        description: desc,
-        date: date,
-        course: course
-    });
-
-    // 2. SAFETY NET: Find active tab, default to 'All Courses' if none are clicked
-    const activeTabBtn = document.querySelector('.tab-btn.btn-primary');
-    const activeTab = activeTabBtn ? activeTabBtn.textContent : 'All Courses';
-    
-    // Instantly draw to the calendar
-    updateCalendarView(activeTab); 
-
-    // 3. Instantly update the Daily Overview list (The SMART way)
-    const listContainer = document.getElementById('daily-event-list');
-    listContainer.innerHTML = ''; // Completely wipe the old HTML clean!
-
-    // Find all events for this specific day in the master array
-    const eventsToday = allAssessments.filter(a => a.date === date);
-
-    if (eventsToday.length === 0) {
-        listContainer.innerHTML = '<p class="text-muted" style="margin-bottom: 20px;">No tasks scheduled for this day.</p>';
-    } else {
-        // Redraw every task for today from scratch so there are zero duplicates
-        eventsToday.forEach(event => {
-            let blockColor = courseColors[event.course] || '#2563eb';
-            listContainer.innerHTML += `
-                <div class="task-item" style="border-left: 4px solid ${blockColor}; padding-left: 12px;">
-                    <div>
-                        <h4 style="margin: 0; color: #1e293b;">${event.course}: ${event.name}</h4>
-                        <p class="text-secondary" style="margin: 4px 0 0 0; font-size: 0.9rem;">${event.description || 'No description provided.'}</p>
-                    </div>
-                    
-                    <div class="task-actions">
-                        <button class="action-btn edit-btn" onclick="editTask('${event.name}', '${event.date}')" title="Edit">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </button>
-                        <button class="action-btn delete-btn" onclick="deleteTask('${event.name}', '${event.date}', this)" title="Delete">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
-                    </div>
-                </div>
-            `;
+    // NEW: Send the task to Liam's server to be saved in MongoDB
+    try {
+        await fetch('http://localhost:5000/api/assessments', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({
+                name: name,
+                description: desc,
+                dueDate: date, // Matches Ray's model name
+                courseCode: course
+            })
         });
-    }
 
-    // 4. Reset inputs
-    document.getElementById('assessment-name-input').value = '';
-    document.getElementById('assessment-desc-input').value = '';
-    
-    // 5. Hide form and instantly go back to the newly updated Daily View
-    assessmentCard.style.display = 'none';
-    document.getElementById('daily-info-card').style.display = 'block';
-    
-    window.dispatchEvent(new Event('resize'));
+        // After saving, reload everything from the server so the calendar updates
+        await loadDataFromServer();
+
+        // Reset UI
+        document.getElementById('assessment-name-input').value = '';
+        document.getElementById('assessment-desc-input').value = '';
+        assessmentCard.style.display = 'none';
+        document.getElementById('daily-info-card').style.display = 'block';
+        window.dispatchEvent(new Event('resize'));
+
+    } catch (err) {
+        console.error("Error saving assessment:", err);
+    }
 }
 
 // 3. TAB LOGIC: Controls what cards are visible
@@ -330,99 +321,46 @@ function editTask(taskName, taskDate) {
     updateCalendarView(activeTab);
 }
 
-function saveNewGrade() {
-    // 1. Find out which tab is currently selected
-    let activeTabBtn = document.querySelector('.tab-btn.btn-primary');
-    if (!activeTabBtn || activeTabBtn.textContent === 'All Courses') {
-        alert("Please select a specific course tab before adding a grade!");
-        return;
-    }
-    let courseName = activeTabBtn.textContent;
+async function saveNewGrade() {
+    const token = localStorage.getItem('token');
+    const activeTabBtn = document.querySelector('.tab-btn.btn-primary');
+    const courseCode = activeTabBtn.textContent;
 
-    // 2. Grab the inputs (FIXED THE IDs HERE to match your HTML!)
-    let name = document.getElementById('grade-name-input').value;
-    let earned = parseFloat(document.getElementById('earned').value);
-    let total = parseFloat(document.getElementById('total').value);
+    const payload = {
+        courseCode: courseCode,
+        name: document.getElementById('grade-name-input').value,
+        earnedMarks: parseFloat(document.getElementById('earned').value),
+        totalMarks: parseFloat(document.getElementById('total').value)
+    };
 
-    if (!name || isNaN(earned) || isNaN(total)) {
-        alert("Please fill in all grade fields with valid numbers.");
-        return;
-    }
-
-    // 3. Save it to the array
-    courseGrades[courseName].push({ name: name, earned: earned, total: total });
-
-    // 4. PUSH TO THE BROWSER MEMORY (This is what Raymond's file will read!)
-    localStorage.setItem('sharedCourseGrades', JSON.stringify(courseGrades));
-
-    // 5. Update your top header instantly
-    updateCourseAverage(courseName);
-
-    // 6. Clear inputs
-    document.getElementById('grade-name-input').value = '';
-    document.getElementById('earned').value = '';
-    document.getElementById('total').value = '';
-}
-
-function updateCourseAverage(courseName) {
-    const display = document.getElementById('average-display');
-    
-    if (courseName === 'All Courses' || courseName === 'All') {
-        let totalPercentages = 0;
-        let activeCourses = 0;
-
-        // Loop through every course in your database
-        for (let course in courseGrades) {
-            let grades = courseGrades[course];
-            
-            if (grades && grades.length > 0) {
-                let courseWeight = 0;
-                let courseSum = 0;
-
-                // Calculate this specific course's average
-                grades.forEach(g => {
-                    courseWeight += g.total;
-                    courseSum += (g.earned * g.total);
-                });
-
-                // Add this course's average to our grand total
-                if (courseWeight > 0) {
-                    totalPercentages += (courseSum / courseWeight);
-                    activeCourses++;
-                }
-            }
-        }
-
-        // If you have no grades in ANY course yet
-        if (activeCourses === 0) {
-            display.innerText = '--%';
-        } else {
-            // Divide the sum of course averages by the number of active courses
-            let overall = (totalPercentages / activeCourses).toFixed(1);
-            display.innerText = overall + '%';
-        }
-        return;
-    }
-    
-    let grades = courseGrades[courseName];
-    if (!grades || grades.length === 0) {
-        display.innerText = '--%';
-        return;
-    }
-
-    let totalWeight = 0;
-    let weightedSum = 0;
-    
-    grades.forEach(g => {
-        totalWeight += g.total; 
-        weightedSum += (g.earned * g.total); 
+    const response = await fetch('http://localhost:5000/api/assessments/add-grade', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(payload)
     });
 
-    if (totalWeight === 0) {
-        display.innerText = '--%';
+    const result = await response.json();
+    // Use the average the SERVER calculated 
+    document.getElementById('average-display').innerText = result.serverCalculatedAverage + "%";
+}
+
+async function updateCourseAverage(courseName) {
+    const display = document.getElementById('average-display');
+    const token = localStorage.getItem('token');
+
+    if (courseName === 'All Courses' || courseName === 'All') {
+        display.innerText = "Dashboard View"; // Or a general avg if you want to write a route for it
         return;
     }
 
-    let average = (weightedSum / totalWeight).toFixed(1); 
-    display.innerText = average + '%';
+    // Ask the server for the calculation
+    const response = await fetch(`http://localhost:5000/api/assessments/average/${courseName}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    
+    display.innerText = data.average + "%";
 }
