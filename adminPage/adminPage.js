@@ -18,6 +18,8 @@ async function fetchAdminCourses() {
         if (response.ok) {
             globalCourses = await response.json();
             renderCourses(globalCourses);
+            updateDashboardStats(globalCourses); 
+            setupSearchBar();                    
         } else {
             document.getElementById('courses-container').innerHTML = '<p class="text-danger text-center">Failed to load courses.</p>';
         }
@@ -51,6 +53,7 @@ function renderCourses(courses) {
         const courseCard = document.createElement('div');
         courseCard.className = 'card';
         courseCard.style.marginBottom = 'var(--space-md)';
+        courseCard.id = `course-card-${course.courseCode.toLowerCase()}`;
         
         courseCard.innerHTML = `
             <div class="card-header flex-between" style="align-items: center; margin-bottom: 15px;">
@@ -58,7 +61,7 @@ function renderCourses(courses) {
                     <h3 class="card-title" style="margin: 0;">${course.courseName}</h3>
                     <h4 class="text-secondary" style="margin: 5px 0 0 0;">ID: ${course.courseCode}</h4>
                 </div>
-                <button class="btn btn-tertiary status-btn" style="background-color: ${btnColor}; color: white; padding: 5px 15px; border-radius: 4px; border: none; cursor: pointer;">${btnText}</button>
+                <button class="btn btn-tertiary status-btn" data-id="${course._id}" style="background-color: ${btnColor}; color: white; padding: 5px 15px; border-radius: 4px; border: none; cursor: pointer;">${btnText}</button>
             </div>
             <div class="card-body">
                 <div class="grid grid-3">
@@ -83,16 +86,50 @@ function renderCourses(courses) {
 }
 
 function attachEditButtonLogic() {
-    // 1. Enable/Disable Status Logic (Visual only for now)
+    // 1. Enable/Disable Status Logic (NOW CONNECTED TO MONGODB)
     const statusBtns = document.querySelectorAll('.status-btn');
     statusBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (this.innerText === 'Enabled') {
-                this.innerText = 'Disabled';
-                this.style.backgroundColor = '#ff3838';
-            } else {
-                this.innerText = 'Enabled';
-                this.style.backgroundColor = '#30d630';
+        btn.addEventListener('click', async function() {
+            const courseId = this.getAttribute('data-id');
+            const currentStatus = this.innerText === 'Enabled';
+            const newStatus = !currentStatus; // Flip it!
+
+            // 1. Optimistic UI Update (Change colors instantly so it feels fast)
+            this.innerText = newStatus ? 'Enabled' : 'Disabled';
+            this.style.backgroundColor = newStatus ? '#30d630' : '#ff3838';
+
+            // 2. Update our global array and refresh the dashboard stats instantly!
+            const courseIndex = globalCourses.findIndex(c => c._id === courseId);
+            if (courseIndex !== -1) {
+                globalCourses[courseIndex].isActive = newStatus;
+                updateDashboardStats(globalCourses); 
+            }
+
+            // 3. Send the change to MongoDB
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ isActive: newStatus })
+                });
+
+                if (!response.ok) throw new Error("Database failed to update");
+
+            } catch (error) {
+                console.error(error);
+                alert("Failed to save status to database. Reverting back.");
+                
+                // If the database fails, switch the button and stats back
+                this.innerText = currentStatus ? 'Enabled' : 'Disabled';
+                this.style.backgroundColor = currentStatus ? '#30d630' : '#ff3838';
+                if (courseIndex !== -1) {
+                    globalCourses[courseIndex].isActive = currentStatus;
+                    updateDashboardStats(globalCourses);
+                }
             }
         });
     });
@@ -117,20 +154,16 @@ function openModal(courseId) {
     document.getElementById('modalCourseTitle').innerText = `Edit: ${course.courseName}`;
     
     const list = document.getElementById('modalAssessmentList');
-    list.innerHTML = ''; // Clear old data
+    list.innerHTML = ''; 
     
-    // Draw a row for every existing category
     if (course.categories) {
         course.categories.forEach(cat => {
             list.insertAdjacentHTML('beforeend', createRow(cat.name, cat.weight));
         });
     }
-    
-    // Show the modal
     document.getElementById('assessmentModal').style.display = 'flex';
 }
 
-// HTML blueprint for a single editable row
 function createRow(name = '', weight = '') {
     return `
         <div class="assessment-row flex-between" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
@@ -143,24 +176,19 @@ function createRow(name = '', weight = '') {
 
 function setupModalListeners() {
     const modal = document.getElementById('assessmentModal');
-
-    // Close Modal triggers
     document.getElementById('closeModalBtn').addEventListener('click', () => modal.style.display = 'none');
     document.getElementById('cancelModalBtn').addEventListener('click', () => modal.style.display = 'none');
 
-    // Add a blank row
     document.getElementById('addRowBtn').addEventListener('click', () => {
         document.getElementById('modalAssessmentList').insertAdjacentHTML('beforeend', createRow());
     });
 
-    // Delete a row (Listens to the whole list, triggers if an 'X' is clicked)
     document.getElementById('modalAssessmentList').addEventListener('click', (e) => {
         if (e.target.classList.contains('delete-row-btn')) {
             e.target.closest('.assessment-row').remove();
         }
     });
 
-    // Send data to MongoDB!
     document.getElementById('saveAssessmentsBtn').addEventListener('click', saveAssessmentsToDatabase);
 }
 
@@ -171,7 +199,6 @@ async function saveAssessmentsToDatabase() {
     let newCategories = [];
     let totalWeight = 0;
 
-    // Loop through all the rows and scoop up the data
     rows.forEach(row => {
         const name = row.querySelector('.cat-name').value.trim();
         const weight = Number(row.querySelector('.cat-weight').value);
@@ -180,74 +207,7 @@ async function saveAssessmentsToDatabase() {
             totalWeight += weight;
         }
     });
-    // --- Edit Assessments Logic ---
-const editAssessmentsBtn = document.getElementById('edit-assessments-btn');
-const upcomingAssessmentsContainer = document.getElementById('upcoming-assessments');
-const addAssessmentBtn = document.getElementById('add-assessment-btn');
 
-editAssessmentsBtn.addEventListener('click', function() {
-    const isEditing = this.innerText === 'Save Assessments';
-    
-    // We select these dynamically here so it catches any newly added items
-    const assessmentItems = document.querySelectorAll('.assessment-item');
-    const removeBtns = document.querySelectorAll('.remove-btn');
-
-    if (isEditing) {
-        // Switch back to normal mode (Save)
-        assessmentItems.forEach(item => {
-            item.contentEditable = "false";
-            item.style.border = "none";
-            item.style.padding = "0";
-            item.style.backgroundColor = "transparent";
-        });
-        
-        // Hide add/remove buttons
-        removeBtns.forEach(btn => btn.style.display = "none");
-        addAssessmentBtn.style.display = "none";
-        
-        this.innerText = 'Edit Assessments';
-    } else {
-        // Switch to Edit mode
-        assessmentItems.forEach(item => {
-            item.contentEditable = "true";
-            item.style.border = "1px solid #547eaa";
-            item.style.padding = "2px 5px";
-            item.style.backgroundColor = "#fff";
-            item.style.borderRadius = "4px";
-        });
-        
-        // Show add/remove buttons
-        removeBtns.forEach(btn => btn.style.display = "inline-block");
-        addAssessmentBtn.style.display = "block";
-        
-        this.innerText = 'Save Assessments';
-    }
-});
-
-// --- Add New Assessment Logic ---
-addAssessmentBtn.addEventListener('click', function() {
-    // Create a new row
-    const newRow = document.createElement('div');
-    newRow.className = 'assessment-row flex-between';
-    newRow.style.alignItems = 'center';
-    newRow.style.marginBottom = 'var(--space-sm)';
-    
-    newRow.innerHTML = `
-        <p class="text-secondary assessment-item" contentEditable="true" style="margin: 0; border: 1px solid #547eaa; padding: 2px 5px; background-color: #fff; border-radius: 4px;">New Assessment</p>
-        <button class="btn btn-danger remove-btn" style="padding: 2px 8px;">X</button>
-    `;
-    upcomingAssessmentsContainer.insertBefore(newRow, addAssessmentBtn);
-});
-
-// --- Delete Assessment Logic 
-upcomingAssessmentsContainer.addEventListener('click', function(e) {
-    // Check if the clicked element has the 'remove-btn' class
-    if (e.target.classList.contains('remove-btn')) {
-        e.target.closest('.assessment-row').remove();
-    }
-});
-
-    // Optional Safety Check
     if (totalWeight !== 100) {
         const proceed = confirm(`Warning: Your total weight adds up to ${totalWeight}%. It usually should be 100%. Do you still want to save?`);
         if (!proceed) return;
@@ -256,7 +216,6 @@ upcomingAssessmentsContainer.addEventListener('click', function(e) {
     const token = localStorage.getItem('token');
     
     try {
-        // Send the PUT request to the route we just built!
         const response = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
             method: 'PUT',
             headers: {
@@ -276,5 +235,60 @@ upcomingAssessmentsContainer.addEventListener('click', function(e) {
     } catch (error) {
         console.error(error);
         alert("Server error while saving.");
+    }
+}
+
+// ==========================================
+// TOP DASHBOARD LOGIC (STATS & SEARCH)
+// ==========================================
+
+function updateDashboardStats(courses) {
+    const activeCourses = courses.filter(course => course.isActive);
+    const activeCountElement = document.getElementById('stat-active-courses');
+    if (activeCountElement) activeCountElement.innerText = activeCourses.length;
+
+    let totalMidtermWeight = 0;
+    let midtermCount = 0;
+
+    activeCourses.forEach(course => {
+        if (course.categories && course.categories.length > 0) {
+            const midterm = course.categories.find(cat => cat.name.toLowerCase().includes('midterm'));
+            if (midterm) {
+                totalMidtermWeight += midterm.weight;
+                midtermCount++;
+            }
+        }
+    });
+
+    const avgMidterm = midtermCount > 0 ? Math.round(totalMidtermWeight / midtermCount) : 0;
+    const midtermElement = document.getElementById('stat-midterm-weight');
+    if (midtermElement) midtermElement.innerText = `${avgMidterm}%`;
+
+    const completionElement = document.getElementById('stat-completion');
+    if (completionElement) completionElement.innerText = "N/A"; 
+}
+
+function setupSearchBar() {
+    const searchInput = document.getElementById('courseSearchInput');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const query = this.value.trim().toLowerCase();
+                if (query === "") return;
+
+                const targetCard = document.getElementById(`course-card-${query}`);
+                
+                if (targetCard) {
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetCard.style.transition = "box-shadow 0.3s ease";
+                    targetCard.style.boxShadow = "0 0 20px #30d630"; 
+                    setTimeout(() => { targetCard.style.boxShadow = "none"; }, 2000);
+                } else {
+                    alert(`Course ID "${query.toUpperCase()}" not found on this dashboard.`);
+                }
+            }
+        });
     }
 }

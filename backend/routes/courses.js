@@ -40,14 +40,18 @@ router.post('/', async (req, res) => {
         res.status(500).json({ message: "Failed to create course." });
     }
 });
-// PUT: Update an existing course's assessments
+// PUT: Update an existing course (Assessments OR Status)
 router.put('/:id', async (req, res) => {
     try {
-        // Find the course by its ID and update its data with whatever the frontend sends
+        // Create a copy of the incoming data, but delete the _id just in case 
+        // to prevent MongoDB "Cast to ObjectId" crashes
+        const updateData = { ...req.body };
+        delete updateData._id;
+
         const updatedCourse = await Course.findByIdAndUpdate(
             req.params.id,
-            { $set: req.body },
-            { new: true } // Return the freshly updated document
+            { $set: updateData }, 
+            { new: true, runValidators: true } 
         );
         
         if (!updatedCourse) {
@@ -55,8 +59,8 @@ router.put('/:id', async (req, res) => {
         }
         res.status(200).json(updatedCourse);
     } catch (error) {
-        console.error("Error updating course:", error);
-        res.status(500).json({ message: "Failed to update course." });
+        console.error("Error updating course:", error.message);
+        res.status(500).json({ message: "Failed to update course database." });
     }
 });
 module.exports = router;
