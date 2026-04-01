@@ -6,6 +6,7 @@ const mongoose = require('mongoose'); // Import Mongoose
 const cors = require('cors');
 const courseRoutes = require('./routes/courses');
 const assessmentRoutes = require('./routes/assessments');
+const studnetRoutes = require('./routes/students');
 const verifyToken = require('./middleware/authMiddleware');
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/courses', verifyToken, courseRoutes);
 app.use('/api/assessments', verifyToken, assessmentRoutes);
+app.use('/api/students', verifyToken, studnetRoutes);
 
 // 2. Connecting to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)

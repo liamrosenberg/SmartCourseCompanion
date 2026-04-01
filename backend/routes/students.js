@@ -1,0 +1,82 @@
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User');
+const Assessment = require('../models/Assessment');
+
+// GET dashboard stats
+router.get('/:userId/stats', async (req, res) =>{
+    try{
+        const userId = req.params.userId;
+
+        // Get user with enrolled courses
+        const user = await User.findById(userId).populate('enrolledCourses');
+        if (!user){
+            return res.status(404).json({ message: 'User not found' });
+
+        }
+
+        // Get all assessments for this user
+        const assessments = await Assessment.find({ user: userId});
+
+        // Calculate stats
+        const activeCourses = user.enrolledCourses.length;
+
+        // Count pending assessments
+        const pendingAssessments = assessments.filter(a => !a.isCompleted).length;
+
+        // Calculate overall avg
+        const completedAssessment = assessments.filter(a => a.isCompleted && a.earnedMarks !== undefined && a.totalMarks > 0);
+        let overallAverage = 0;
+
+        if (completedAssessment.length > 0){
+            const totalPercentage = completedAssessment.reduce((sum, a) => {
+                return sum + (a.earnedMarks / a.totalMarks * 100);
+            }, 0);
+            overallAverage = (totalPercentage / completedAssessment.length).toFixed(1);
+        }
+
+        // Get course avg for chart
+        const courseAverage = {};
+        user.enrolledCourses.forEach(course => {
+            const courseAssessments = assessments.filter(
+                a => a.courseCode === course.courseCode && a.isCompleted && a.totalMarks > 0
+            );
+
+            if (courseAssessments.length > 0){
+                const avg = courseAssessments.reduce((sum, a) => {
+                    return sum + (a.earnedMarks / a.totalMarks * 100);
+                }, 0) / courseAssessments.length;
+
+                courseAverage[course.courseCode] = {
+                    courseName: course.courseName,
+                    average: avg.toFixed(1)
+                };
+            }
+        });
+
+        // Assessment completion stats for doughnut chart
+        const completedCount = assessments.filter(a => a.isCompleted).length;
+        const overdueCount = assessments.filter(a => {
+            return !a.isCompleted && a.dueDate && new Date(a.dueDate) < new Date();
+        }).length;
+        const pendingCount = pendingAssessments - overdueCount;
+
+        res.json({
+            activeCourses,
+            overallAverage,
+            pendingAssessments,
+            courseAverage,
+            assessmentProgress: {
+                completed: completedCount,
+                pending: pendingCount,
+                overdue: overdueCount
+            }
+        });
+    } catch (error){
+        console.error('Error fetching stats:', error);
+        res.status(500).json({ message: 'server error'});
+    }
+    
+});
+
+module.exports = router;

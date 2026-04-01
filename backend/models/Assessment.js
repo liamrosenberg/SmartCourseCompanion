@@ -16,3 +16,5 @@ const assessmentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const Assessment = mongoose.model('Assessment', assessmentSchema);
+
+module.exports = Assessment;
