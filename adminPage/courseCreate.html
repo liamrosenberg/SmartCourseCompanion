@@ -70,12 +70,15 @@
                             <div class="grid grid-3" style="margin-bottom: var(--space-lg);">
                                 <div style="grid-column: span 2;">
                                     <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Reusable Course Structure</label>
-                                    <select style="width: 60%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit; background: white;">
-                                        <option value="none">-- Select a Template --</option>
-                                        <option value="template1">Standard 12-Week Course</option>
-                                        <option value="template2">Project-Based Syllabus</option>
-                                        <option value="template3">Blank Canvas</option>
-                                    </select>
+                                 <select id="courseTemplateSelect" class="form-control" style="width: 100%; padding: 10px; border-radius: 4px;">
+                                    <option value="none" disabled selected>Select a predetermind course.</option>
+                                    <option value="standard">Standard 12-Week Course</option>
+                                    <option value="project">Project Based</option>
+                                    <option value="test_heavy">Test Heavy</option>
+                                </select>
+
+<div id="createAssessmentList" style="margin-top: 20px;">
+    </div>
                                 </div>
                             </div>
 
