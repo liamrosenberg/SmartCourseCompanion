@@ -1,4 +1,4 @@
-let globalCourses = []; 
+let globalCourses = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchAdminCourses();
@@ -74,56 +74,47 @@ function renderCourses(courses) {
                         <p class="text-secondary">--/--</p>
                     </div>
                 </div>
-                <div class="button-group mt-md" style="justify-content: flex-start; margin-top: 15px;">
+                <div class="button-group mt-md" style="justify-content: flex-start; margin-top: 15px; display: flex; gap: 10px;">
                     <button class="btn btn-secondary edit-assessments-btn" data-id="${course._id}">Edit Assessments</button>
+                    <button class="btn delete-course-btn" data-id="${course._id}" style="background-color: transparent; color: #ff3838; border: 1px solid #ff3838; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Delete Course</button>
                 </div>
             </div>
         `;
         container.appendChild(courseCard);
     });
 
-    attachEditButtonLogic();
+    attachCardButtonLogic();
 }
 
-function attachEditButtonLogic() {
-    // 1. Enable/Disable Status Logic (NOW CONNECTED TO MONGODB)
+function attachCardButtonLogic() {
+    // 1. Status Logic (Enable/Disable)
     const statusBtns = document.querySelectorAll('.status-btn');
     statusBtns.forEach(btn => {
         btn.addEventListener('click', async function() {
             const courseId = this.getAttribute('data-id');
             const currentStatus = this.innerText === 'Enabled';
-            const newStatus = !currentStatus; 
+            const newStatus = !currentStatus;
 
-            // 1. change colors
             this.innerText = newStatus ? 'Enabled' : 'Disabled';
             this.style.backgroundColor = newStatus ? '#30d630' : '#ff3838';
 
-            // 2. Update global array and refresh the dashboard stats instantly
             const courseIndex = globalCourses.findIndex(c => c._id === courseId);
             if (courseIndex !== -1) {
                 globalCourses[courseIndex].isActive = newStatus;
                 updateDashboardStats(globalCourses); 
             }
 
-            // 3. Send the change to MongoDB
             const token = localStorage.getItem('token');
             try {
                 const response = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ isActive: newStatus })
                 });
-
                 if (!response.ok) throw new Error("Database failed to update");
-
             } catch (error) {
                 console.error(error);
-                alert("Failed to save status to database. Reverting back.");
-                
-                // If the database fails, switch the button and stats back
+                alert("Failed to save status. Reverting back.");
                 this.innerText = currentStatus ? 'Enabled' : 'Disabled';
                 this.style.backgroundColor = currentStatus ? '#30d630' : '#ff3838';
                 if (courseIndex !== -1) {
@@ -134,7 +125,7 @@ function attachEditButtonLogic() {
         });
     });
 
-    // edit assesments logic
+    // 2. Edit Assessments Logic
     const editAssessmentsBtns = document.querySelectorAll('.edit-assessments-btn');
     editAssessmentsBtns.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -142,10 +133,45 @@ function attachEditButtonLogic() {
             openModal(courseId);
         });
     });
+
+    // 3. NEW: Delete Course Logic
+    const deleteCourseBtns = document.querySelectorAll('.delete-course-btn');
+    deleteCourseBtns.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const courseId = this.getAttribute('data-id');
+            
+            // Safety check!
+            const confirmDelete = confirm("Are you sure you want to permanently delete this course? This action cannot be undone.");
+            if (!confirmDelete) return;
+
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`http://localhost:5000/api/courses/${courseId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    // Remove the course from our array
+                    globalCourses = globalCourses.filter(c => c._id !== courseId);
+                    
+                    // Redraw the dashboard and update the stats instantly
+                    renderCourses(globalCourses);
+                    updateDashboardStats(globalCourses);
+                } else {
+                    const err = await response.json();
+                    alert("Failed to delete course: " + err.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Server error while deleting course.");
+            }
+        });
+    });
 }
 
 // ==========================================
-// ADD/DELETE/SAVE
+// THE MODAL LOGIC (ADD/DELETE/SAVE)
 // ==========================================
 
 function openModal(courseId) {

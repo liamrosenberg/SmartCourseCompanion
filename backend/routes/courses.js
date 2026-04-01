@@ -63,6 +63,20 @@ router.put('/:id', async (req, res) => {
         res.status(500).json({ message: "Failed to update course database." });
     }
 });
+// DELETE: Permanently remove a course
+router.delete('/:id', async (req, res) => {
+    try {
+        const deletedCourse = await Course.findByIdAndDelete(req.params.id);
+        
+        if (!deletedCourse) {
+            return res.status(404).json({ message: "Course not found." });
+        }
+        res.status(200).json({ message: "Course deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting course:", error.message);
+        res.status(500).json({ message: "Failed to delete course from database." });
+    }
+});
 module.exports = router;
 
 
