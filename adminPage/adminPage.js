@@ -1,8 +1,8 @@
-let globalCourses = []; // Stores the courses so the modal can access them
+let globalCourses = []; 
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchAdminCourses();
-    setupModalListeners(); // Turn on the modal buttons
+    setupModalListeners();
 });
 
 async function fetchAdminCourses() {
@@ -92,13 +92,13 @@ function attachEditButtonLogic() {
         btn.addEventListener('click', async function() {
             const courseId = this.getAttribute('data-id');
             const currentStatus = this.innerText === 'Enabled';
-            const newStatus = !currentStatus; // Flip it!
+            const newStatus = !currentStatus; 
 
-            // 1. Optimistic UI Update (Change colors instantly so it feels fast)
+            // 1. change colors
             this.innerText = newStatus ? 'Enabled' : 'Disabled';
             this.style.backgroundColor = newStatus ? '#30d630' : '#ff3838';
 
-            // 2. Update our global array and refresh the dashboard stats instantly!
+            // 2. Update global array and refresh the dashboard stats instantly
             const courseIndex = globalCourses.findIndex(c => c._id === courseId);
             if (courseIndex !== -1) {
                 globalCourses[courseIndex].isActive = newStatus;
@@ -134,7 +134,7 @@ function attachEditButtonLogic() {
         });
     });
 
-    // 2. Open the Modal when "Edit Assessments" is clicked
+    // edit assesments logic
     const editAssessmentsBtns = document.querySelectorAll('.edit-assessments-btn');
     editAssessmentsBtns.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -145,7 +145,7 @@ function attachEditButtonLogic() {
 }
 
 // ==========================================
-// THE MODAL LOGIC (ADD/DELETE/SAVE)
+// ADD/DELETE/SAVE
 // ==========================================
 
 function openModal(courseId) {
