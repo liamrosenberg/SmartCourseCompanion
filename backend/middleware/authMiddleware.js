@@ -28,7 +28,8 @@ const verifyToken = (req, res, next) => {
         
     } catch (error) {
         // If the token is fake, expired, or tampered with, kick them out
-        res.status(400).json({ message: 'Invalid or expired token.' });
+        // 401 is the correct HTTP status for auth failure — AUTH.fetch watches for this
+        res.status(401).json({ message: 'Invalid or expired token.' });
     }
 };
 

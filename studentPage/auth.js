@@ -29,7 +29,15 @@ const AUTH = {
     logout(){
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '../login-registeration/landingPage.html';
+        window.location.href = '../login-registration/landingPage.html';
+    },
+
+    // Escape HTML special characters to prevent XSS when rendering user data into innerHTML
+    escapeHtml(str){
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(String(str)));
+        return div.innerHTML;
     },
 
     // Make authenticated api call

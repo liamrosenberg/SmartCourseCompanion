@@ -18,21 +18,35 @@ const courseColors = {
 let allAssessments = [];
 
 async function loadDataFromServer() {
-    const token = localStorage.getItem('token'); // Get Liam's login token
-    
+    const token = localStorage.getItem('token');
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userId = userData ? userData.id : null;
+
+    if (!userId) return;
+
     try {
-        // 1. Fetch Assessments for the Calendar
-        const res = await fetch('http://localhost:5000/api/assessments', {
+        // 1. Fetch this user's assessments for the Calendar
+        // Route is GET /api/assessments/:userId — must pass the logged-in user's ID
+        const res = await fetch(`http://localhost:5000/api/assessments/${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        allAssessments = await res.json();
+        const rawAssessments = await res.json();
 
-        // 2. Fetch Courses for your Tabs
-        const courseRes = await fetch('http://localhost:5000/api/courses', {
+        // Map DB field names (dueDate, courseCode) to what the calendar expects (date, course)
+        // dueDate is an ISO string like "2026-04-15T00:00:00.000Z" — slice to "YYYY-MM-DD"
+        allAssessments = Array.isArray(rawAssessments) ? rawAssessments.map(a => ({
+            ...a,
+            date: a.dueDate ? a.dueDate.substring(0, 10) : null,
+            course: a.courseCode
+        })) : [];
+
+        // 2. Fetch only the courses this user is enrolled in (not all courses)
+        // Route is GET /api/courses/enrolled/:userId
+        const courseRes = await fetch(`http://localhost:5000/api/courses/enrolled/${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const coursesData = await courseRes.json();
-        myCourses = coursesData.map(c => c.courseCode);
+        myCourses = Array.isArray(coursesData) ? coursesData.map(c => c.courseCode) : [];
 
         // 3. Refresh the UI
         populateTabs();
@@ -250,12 +264,18 @@ function showAddAssessmentForm() {
     const dailyCard = document.getElementById('daily-info-card');
     const date = dailyCard.getAttribute('data-selected-date');
 
-    //hiding the daily view and show form 
-    dailyCard.style.display = 'none'
+    // Guard: user must click a calendar date before adding an assessment
+    if (!date) {
+        alert('Please click a date on the calendar first.');
+        return;
+    }
+
+    //hiding the daily view and show form
+    dailyCard.style.display = 'none';
     const assessmentCard = document.getElementById('assessment-card');
     assessmentCard.style.display = 'block';
 
-    //passing the new data to the form 
+    //passing the new data to the form
     assessmentCard.setAttribute('data-selected-date', date);
     document.getElementById('selected-date-header').innerText = "Add Assessment";
     document.getElementById('selected-date-subtitle').innerText = "Scheduling for: " + date;

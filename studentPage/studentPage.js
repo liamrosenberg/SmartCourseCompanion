@@ -10,6 +10,13 @@ if (!AUTH.isLoggedIn()){
 const API_URL = 'http://localhost:5000';
 const user = AUTH.getUser();
 
+// used by the edit form and cancel action
+let currentAssessments = [];
+
+// Chart instances — kept so we can destroy them before re-rendering on refresh
+let barChart = null;
+let doughnutChart = null;
+
 // =================
 // Fetch dashboard data
 // =================
@@ -21,6 +28,11 @@ async function loadDashboardData() {
 
         if (!response) return; // Logged out due to auth error
 
+        if (!response.ok) {
+            console.error('Stats request failed:', response.status);
+            return;
+        }
+
         const stats = await response.json();
 
         // Update stat cards
@@ -30,7 +42,7 @@ async function loadDashboardData() {
         createChartsWithData(stats);
 
         // Fetch and display assessments
-        loadAssessments();
+        await loadAssessments();
     } catch (error){
         console.error('Error loading dashboard:', error);
     }
@@ -65,8 +77,9 @@ async function loadAssessments(){
 
         const assessments = await response.json();
 
-        // Display first 3 assessments (show all later)
-        displayAssessments(assessments.slice(0, 3));
+        // Cache displayed slice so the edit form can read field values
+        currentAssessments = assessments.slice(0, 3);
+        displayAssessments(currentAssessments);
     } catch(error){
         console.error('Erorr loading assessments:', error);
     }
@@ -75,8 +88,10 @@ async function loadAssessments(){
 function displayAssessments(assessments){
     const assessmentList = document.querySelector('.assessment-list');
 
-    if (assessments.length === 0){
-        assessmentList.innerHTML = '<p class="text-secondary">No assessments yet. Enroll in courses to get started!</p>';
+    if (!assessmentList) return;
+
+    if (assessments.length === 0) {
+        assessmentList.innerHTML = '<p class="text-secondary" style="text-align: center; padding: 2rem;">No assessments yet.</p>';
         return;
     }
 
@@ -84,17 +99,25 @@ function displayAssessments(assessments){
         const status = assessment.isCompleted ? 'success' : 'warning';
         const statusText = assessment.isCompleted ? 'Completed' : 'Pending';
         const dueDate = assessment.dueDate ? new Date(assessment.dueDate).toLocaleDateString() : 'No due date';
+        const id = AUTH.escapeHtml(assessment._id);
 
+        // Use AUTH.escapeHtml on all user-supplied fields
         return `
-        <div class="assessment-item">
+        <div class="assessment-item" data-assessment-id="${id}">
             <div class="flex-between">
                 <div>
-                    <h4>${assessment.courseCode} - ${assessment.name}</h4>
-                    <p class="text-secondary">${assessment.description || 'No description'}</p>
+                    <h4>${AUTH.escapeHtml(assessment.courseCode)} - ${AUTH.escapeHtml(assessment.name)}</h4>
+                    <p class="text-secondary">${AUTH.escapeHtml(assessment.description) || 'No description'}</p>
                 </div>
                 <div class="text-right">
                     <span class="badge badge-${status}">${statusText}</span>
                     <p class="text-secondary mt-sm">Due: ${dueDate}</p>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 0.4rem; justify-content: flex-end;">
+                        <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;"
+                            data-action="edit" data-id="${id}">Edit</button>
+                        <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.8rem; color: #ef4444; border-color: #ef4444;"
+                            data-action="delete" data-id="${id}">Delete</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -106,9 +129,246 @@ function displayAssessments(assessments){
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Load dashboard data when page loads
     loadDashboardData();
+
+    document.getElementById('exportGradesBtn').addEventListener('click', exportGradesToCSV);
+
+    // handle edit/delete/save/cancel on all assessment items
+    const assessmentList = document.querySelector('.assessment-list');
+    assessmentList.addEventListener('click', async (e) => {
+        // closest() walks up from the actual click target (text node, icon, etc.)
+        // to the nearest ancestor (or self) that has data-action — more reliable than e.target directly
+        const button = e.target.closest('[data-action]');
+        if (!button) return;
+
+        const action = button.dataset.action;
+        const id     = button.dataset.id;
+
+        if (action === 'edit')        showEditForm(id);
+        if (action === 'delete')      await deleteAssessment(id);
+        if (action === 'cancel-edit') displayAssessments(currentAssessments);
+        if (action === 'save-edit')   await saveAssessment(id, button.closest('.assessment-item'));
+    });
 });
+
+// ============================================
+// EXPORT GRADES TO CSV
+// ============================================
+// Fetches ALL of the user's assessments (not just the dashboard preview of 3),
+// converts them to CSV, and triggers a file download in the browser.
+
+async function exportGradesToCSV() {
+    try {
+        const response = await AUTH.fetch(`${API_URL}/api/assessments/${user.id}`);
+        if (!response || !response.ok) {
+            showToast('Failed to fetch grades.', 'error');
+            return;
+        }
+
+        const assessments = await response.json();
+
+        if (!assessments.length) {
+            showToast('No grades to export yet.', 'error');
+            return;
+        }
+
+        // CSV header row
+        const headers = [
+            'Course Code', 'Assessment Name', 'Description',
+            'Earned Marks', 'Total Marks', 'Grade (%)', 'Status', 'Due Date'
+        ];
+
+        // One row per assessment
+        const rows = assessments.map(a => {
+            const grade = (a.earnedMarks != null && a.totalMarks > 0)
+                ? ((a.earnedMarks / a.totalMarks) * 100).toFixed(1)
+                : '--';
+            const due    = a.dueDate ? new Date(a.dueDate).toLocaleDateString() : '';
+            const status = a.isCompleted ? 'Completed' : 'Pending';
+
+            // Wrap text fields in quotes; double any internal quotes to stay valid CSV
+            const q = str => `"${String(str || '').replace(/"/g, '""')}"`;
+
+            return [
+                q(a.courseCode),
+                q(a.name),
+                q(a.description),
+                a.earnedMarks != null ? a.earnedMarks : '',
+                a.totalMarks  != null ? a.totalMarks  : '',
+                grade,
+                status,
+                due
+            ].join(',');
+        });
+
+        const csv  = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url  = URL.createObjectURL(blob);
+
+        // Create a temporary link, click it to trigger the download, then clean up
+        const filename = `grades_${user.username || 'export'}_${new Date().toISOString().slice(0, 10)}.csv`;
+        const link = document.createElement('a');
+        link.href     = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        showToast('Grades exported!', 'success');
+    } catch (error) {
+        console.error('Export error:', error);
+        showToast('Export failed. Please try again.', 'error');
+    }
+}
+
+// ============================================
+// DASHBOARD REFRESH
+// ============================================
+// Re-fetches stats, redraws both charts, and reloads the assessment list.
+// Called after any change (edit/delete) so the UI stays in sync without a page reload.
+
+async function refreshDashboard() {
+    try {
+        const response = await AUTH.fetch(`${API_URL}/api/students/${user.id}/stats`);
+        if (!response || !response.ok) return;
+        const stats = await response.json();
+        updateStatCards(stats);
+        createChartsWithData(stats);
+        await loadAssessments();
+    } catch (error) {
+        console.error('Error refreshing dashboard:', error);
+    }
+}
+
+// ============================================
+// ASSESSMENT EDIT / DELETE
+// ============================================
+
+function showEditForm(id) {
+    const a = currentAssessments.find(x => x._id === id);
+    if (!a) return;
+
+    const item = document.querySelector(`.assessment-item[data-assessment-id="${id}"]`);
+    if (!item) return;
+
+    item.innerHTML = `
+        <div style="padding: 0.25rem 0;">
+            <div class="flex-between" style="margin-bottom: 1rem;">
+                <h4 style="margin: 0;">Edit Assessment</h4>
+                <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.85rem;"
+                    data-action="cancel-edit">Cancel</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Name</label>
+                    <input type="text" class="search-input" name="name" value="${AUTH.escapeHtml(a.name)}"
+                        style="width: 100%; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Course Code</label>
+                    <input type="text" class="search-input" value="${AUTH.escapeHtml(a.courseCode)}"
+                        style="width: 100%; box-sizing: border-box;" disabled>
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Earned Marks</label>
+                    <input type="number" class="search-input" name="earnedMarks" value="${a.earnedMarks ?? ''}" min="0"
+                        style="width: 100%; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Total Marks</label>
+                    <input type="number" class="search-input" name="totalMarks" value="${a.totalMarks ?? ''}" min="1"
+                        style="width: 100%; box-sizing: border-box;">
+                </div>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Description</label>
+                <input type="text" class="search-input" name="description" value="${AUTH.escapeHtml(a.description || '')}"
+                    style="width: 100%; box-sizing: border-box;">
+            </div>
+            <button class="btn btn-primary" style="width: 100%;"
+                data-action="save-edit" data-id="${AUTH.escapeHtml(a._id)}">Save Changes</button>
+        </div>
+    `;
+}
+
+// Reads the inline form values and PUT /api/assessments/:id
+async function saveAssessment(id, container) {
+    const name = container.querySelector('[name="name"]').value.trim();
+    const earnedMarksVal = container.querySelector('[name="earnedMarks"]').value;
+    const totalMarksVal  = container.querySelector('[name="totalMarks"]').value;
+    const description    = container.querySelector('[name="description"]').value.trim();
+
+    if (!name) { showToast('Name cannot be empty.', 'error'); return; }
+
+    try {
+        const response = await AUTH.fetch(`${API_URL}/api/assessments/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                name,
+                description,
+                earnedMarks: earnedMarksVal !== '' ? Number(earnedMarksVal) : undefined,
+                totalMarks:  totalMarksVal  !== '' ? Number(totalMarksVal)  : undefined
+            })
+        });
+
+        if (!response) return;
+
+        if (response.ok) {
+            showToast('Assessment updated.', 'success');
+            await refreshDashboard();
+        } else {
+            const data = await response.json();
+            showToast(data.message || 'Update failed.', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating assessment:', error);
+        showToast('Failed to update. Please try again.', 'error');
+    }
+}
+
+// Confirms with the user and DELETE /api/assessments/:id
+async function deleteAssessment(id) {
+    if (!confirm('Delete this assessment? This cannot be undone.')) return;
+
+    try {
+        const response = await AUTH.fetch(`${API_URL}/api/assessments/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response) return;
+
+        if (response.ok) {
+            showToast('Assessment deleted.', 'success');
+            await refreshDashboard();
+        } else {
+            const data = await response.json();
+            showToast(data.message || 'Delete failed.', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting assessment:', error);
+        showToast('Failed to delete. Please try again.', 'error');
+    }
+}
+
+// Toast notification  green for success, red for error
+function showToast(message, type) {
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed; bottom: 2rem; right: 2rem;
+        padding: 0.875rem 1.5rem; border-radius: 8px;
+        color: #fff; font-weight: 500; font-size: 0.95rem; z-index: 9999;
+        background-color: ${type === 'success' ? '#10b981' : '#ef4444'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
 
 // ============================================
 // CHARTS WITH REAL DATA
@@ -128,7 +388,7 @@ function createBarChartWithData(courseAverages) {
     if (!courseGradesCtx) return;
     
     // Convert courseAverages object to arrays
-    const courseCodes = Object.keys(courseAverages);
+    const courseCodes = Object.keys(courseAverages || {});
     const averages = courseCodes.map(code => parseFloat(courseAverages[code].average));
     
     // If no data, show placeholder
@@ -137,7 +397,8 @@ function createBarChartWithData(courseAverages) {
         averages.push(0);
     }
     
-    new Chart(courseGradesCtx, {
+    if (barChart) barChart.destroy();
+    barChart = new Chart(courseGradesCtx, {
         type: 'bar',
         data: {
             labels: courseCodes,
@@ -178,7 +439,8 @@ function createDoughnutChartWithData(assessmentProgress) {
     
     if (!assessmentProgressCtx) return;
     
-    new Chart(assessmentProgressCtx, {
+    if (doughnutChart) doughnutChart.destroy();
+    doughnutChart = new Chart(assessmentProgressCtx, {
         type: 'doughnut',
         data: {
             labels: ['Completed', 'Pending', 'Overdue'],

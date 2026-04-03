@@ -56,8 +56,18 @@ router.get('/:userId/stats', async (req, res) =>{
 
         // Assessment completion stats for doughnut chart
         const completedCount = assessments.filter(a => a.isCompleted).length;
+
+        // Compare dates at day-level so assessments due TODAY are still "Pending", not "Overdue"
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+
         const overdueCount = assessments.filter(a => {
-            return !a.isCompleted && a.dueDate && new Date(a.dueDate) < new Date();
+            if (!a.isCompleted && a.dueDate) {
+                const due = new Date(a.dueDate);
+                due.setHours(0, 0, 0, 0);
+                return due < startOfToday; // strictly before today = overdue
+            }
+            return false;
         }).length;
         const pendingCount = pendingAssessments - overdueCount;
 
