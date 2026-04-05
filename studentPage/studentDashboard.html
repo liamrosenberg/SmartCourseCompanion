@@ -20,7 +20,7 @@
     <div class="container flex-between" style="align-items: center;">
         <div>
             <h1>Dashboard</h1>
-            <p class="text-secondary">Welcome back, Raymond</p>
+            <p class="text-secondary">Welcome back, <span id="welcomeName"></span></p>
         </div>
         <div id="toggle-slot"></div>
     </div>
@@ -28,7 +28,7 @@
 
         <main class="main-content">
             <div class="container">
-                
+
                 <section>
                     <div class="grid grid-3">
 
@@ -71,50 +71,12 @@
                         <div class="card-body">
                             <div class="assessment-list">
 
-                                <!-- ASSESSMENT 1 -->
+                                <!-- Assessments will be loaded from js code-->
 
-                                <div class="assessment-item">
-                                    <div class="flex-between">
-                                        <div>
-                                            <h4>SOEN 287 - Assignment 1</h4>
-                                            <p class="text-secondary">Web Programming Project</p>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="badge badge-warning">Pending</span>
-                                            <p class="text-secondary mt-sm">Due: Feb 27, 2026</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- ASSESSMENT 2 -->
-                                 <div class="assessment-item">
-                                    <div class="flex-between">
-                                        <div>
-                                            <h4>COMP 249 - Assignment 2</h4>
-                                            <p class="text-secondary">Object-Oriented Programming </p>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="badge badge-danger">Due Soon</span>
-                                            <p class="text-secondary mt-sm">Due: Feb 20, 2026</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- ASSESSMENT 3 -->
-                                 <div class="assessment-item">
-                                    <div class="flex-between">
-                                        <div>
-                                            <h4>Math 205 - Quiz 3</h4>
-                                            <p class="text-secondary">Differential Equations</p>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="badge badge-success">Completed</span>
-                                            <p class="text-secondary mt-sm">Score: 18/20 (90%)</p>
-                                        </div>
-                                    </div>
                                 </div>
 
                             </div>
                         </div>
-                    </div>
                  </section>
 
                  <!-- Visual Summary -->
@@ -123,7 +85,7 @@
                     <h2 class="mb-lg">Performative Overview</h2>
 
                     <div class="grid grid-2">
-                        
+
                         <!-- Chart 1: Course Grades -->
                          <div class="card">
                               <div class="card-header">
@@ -135,8 +97,8 @@
                                 </div>
                               </div>
                          </div>
-                         
-                         
+
+
                           <!-- Chart 2: Assessment Progress -->
                          <div class="card">
                               <div class="card-header">
@@ -159,16 +121,21 @@
                             <p class="text-secondary">Common tasks and tools</p>
                             <div class="button-group mt-lg">
                                 <a href="courseBrowse.html" class="btn btn-primary">Browse Courses</a>
-                                <!-- <button class="btn btn-secondary">GPA Calculator</button> -->
-                                <button class="btn btn-secondary">Export Grades</button>
+                                <a href="gpaCalculator.html" class="btn btn-secondary">GPA Calculator</a>
+                                <button class="btn btn-secondary" id="exportGradesBtn">Export Grades</button>
                             </div>
                         </div>
                     </div>
                  </section>
-                 
+
             </div>
 
         </main>
+
+        <!-- SCRIPTS-->
+
+        <!--Auth-->
+        <script src="auth.js"></script>
 
         <!--Chart.js-->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -176,7 +143,7 @@
         <!-- Link to JavaScript file -->
     <script src="studentPage.js"></script>
 
-    
+
     <!-- Theme toggle script -->
     <script src="../components/ToggleTheme/toggle-theme.js"></script>
 

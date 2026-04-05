@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPA Calculator</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../components/ToggleTheme/toggleStyle.css">
+    <style>
+        .gpa-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .gpa-table th {
+            text-align: left;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--neutral-600);
+            border-bottom: 2px solid var(--neutral-200);
+        }
+        .gpa-table td {
+            padding: 0.4rem 0.75rem;
+            border-bottom: 1px solid var(--neutral-200);
+            vertical-align: middle;
+        }
+        .gpa-result-box {
+            display: none;
+            background: var(--primary-blue-light, #dbeafe);
+            border: 2px solid var(--primary-blue, #2563eb);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        .gpa-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-blue, #2563eb);
+            line-height: 1;
+        }
+        .gpa-scale-note {
+            font-size: 0.85rem;
+            color: var(--neutral-600);
+            margin-top: 0.5rem;
+        }
+        .scale-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .scale-table th, .scale-table td {
+            padding: 0.3rem 0.75rem;
+            text-align: center;
+            border-bottom: 1px solid var(--neutral-200);
+        }
+        .scale-table th {
+            font-weight: 600;
+            color: var(--neutral-600);
+            background: var(--neutral-100);
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="container flex-between" style="align-items: center;">
+            <div>
+                <h1>GPA Calculator</h1>
+                <p class="text-secondary">Estimate your GPA on the 4.3 scale</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a href="studentDashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+                <div id="toggle-slot"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+
+            <div class="grid grid-2" style="gap: 1.5rem; align-items: start;">
+
+                <!-- Calculator Card -->
+                <div style="grid-column: 1 / -1;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Enter Your Courses</h2>
+                            <button class="btn btn-primary" style="padding: 0.4rem 1rem;" onclick="addRow()">+ Add Course</button>
+                        </div>
+                        <div class="card-body" style="overflow-x: auto;">
+                            <table class="gpa-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 35%;">Course</th>
+                                        <th style="width: 20%;">Grade (%)</th>
+                                        <th style="width: 15%;">Credits</th>
+                                        <th style="width: 12%; text-align: center;">Letter</th>
+                                        <th style="width: 18%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="courseTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="card-body" style="border-top: 1px solid var(--neutral-200); text-align: right; padding-top: 1rem;">
+                            <button class="btn btn-primary" onclick="calculateGPA()">Calculate GPA</button>
+                        </div>
+
+                        <!-- Result -->
+                        <div class="gpa-result-box" id="gpaResult">
+                            <p style="font-size: 0.9rem; color: var(--neutral-600); margin-bottom: 0.5rem;">Your estimated GPA</p>
+                            <div class="gpa-number" id="gpaValue">0.00</div>
+                            <p class="gpa-scale-note">out of 4.3 &nbsp;|&nbsp; Total credits: <span id="creditCount">0</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade Scale Reference Card -->
+                <div class="card" style="grid-column: 1 / -1;">
+                    <div class="card-header">
+                        <h3 class="card-title">Concordia Grading Scale</h3>
+                    </div>
+                    <div class="card-body" style="overflow-x: auto;">
+                        <table class="scale-table">
+                            <thead>
+                                <tr>
+                                    <th>Percentage</th>
+                                    <th>Letter</th>
+                                    <th>GPA Points</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>90 – 100%</td><td>A+</td><td>4.3</td></tr>
+                                <tr><td>85 – 89%</td><td>A</td><td>4.0</td></tr>
+                                <tr><td>80 – 84%</td><td>A-</td><td>3.7</td></tr>
+                                <tr><td>75 – 79%</td><td>B+</td><td>3.3</td></tr>
+                                <tr><td>70 – 74%</td><td>B</td><td>3.0</td></tr>
+                                <tr><td>65 – 69%</td><td>B-</td><td>2.7</td></tr>
+                                <tr><td>60 – 64%</td><td>C+</td><td>2.3</td></tr>
+                                <tr><td>55 – 59%</td><td>C</td><td>2.0</td></tr>
+                                <tr><td>50 – 54%</td><td>D</td><td>1.0</td></tr>
+                                <tr><td>0 – 49%</td><td>F</td><td>0.0</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="auth.js"></script>
+    <script src="gpaCalculator.js"></script>
+    <script src="../components/ToggleTheme/toggle-theme.js"></script>
+</body>
+</html>

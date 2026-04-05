@@ -82,7 +82,7 @@ router.post('/login', async (req, res) => {
 
         // MongoDB finds user
         const user = await User.findOne({ username: username });
-        
+
         if (!user) {
             return res.status(400).json({ message: "User not found. Please register first." });
         }
@@ -99,8 +99,8 @@ router.post('/login', async (req, res) => {
 
         // Creating a JWT token for user
         const token = jwt.sign(
-            { id: user._id, role: user.role }, 
-            process.env.JWT_SECRET || 'fallback_secret_key', 
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET || 'fallback_secret_key',
             { expiresIn: '1h' }
         );
 
@@ -120,4 +120,5 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: "Internal server error during login." });
     }
 });
+
 module.exports = router;

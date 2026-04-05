@@ -1,13 +1,7 @@
 // GLOBAL SCOPE: All functions can see these
-const myCourses = ["SOEN 287", "COMP 249", "ENGR 233", "ENGR 213", "MATH 205"];
+let myCourses = [];
 // This acts as the bridge between your page
-let courseGrades = JSON.parse(localStorage.getItem('sharedCourseGrades')) || {
-    "SOEN 287": [],
-    "COMP 249": [],
-    "ENGR 233": [],
-    "ENGR 213": [],
-    "MATH 205": []
-};
+let courseGrades = {};
 let calendar; 
 
 //specific course colors
@@ -20,16 +14,307 @@ const courseColors = {
     "General":  "#64748b"  // Slate Gray
 };
 
-//master array with all the classes 
-let allAssessments = [
-    { name: 'Quiz 1', date: '2026-03-05', course: 'SOEN 287' },
-    { name: 'Midterm', date: '2026-03-12', course: 'COMP 249' },
-    { name: 'Assignment 1', date: '2026-03-20', course: 'ENGR 233' }
-];
+//master array with all the classes
+let allAssessments = [];
+
+let cdFilter = 'all';
+let cdSort   = 'date-asc';
+
+async function loadDataFromServer() {
+    const token = localStorage.getItem('token');
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userId = userData ? userData.id : null;
+
+    if (!userId) return;
+
+    try {
+        // 1. Fetch this user's assessments for the Calendar
+        // Route is GET /api/assessments/:userId — must pass the logged-in user's ID
+        const res = await fetch(`http://localhost:5000/api/assessments/${userId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const rawAssessments = await res.json();
+
+        // Map DB field names (dueDate, courseCode) to what the calendar expects (date, course)
+        // dueDate is an ISO string like "2026-04-15T00:00:00.000Z" — slice to "YYYY-MM-DD"
+        allAssessments = Array.isArray(rawAssessments) ? rawAssessments.map(a => ({
+            ...a,
+            date: a.dueDate ? a.dueDate.substring(0, 10) : null,
+            course: a.courseCode
+        })) : [];
+
+        // 2. Fetch only the courses this user is enrolled in (not all courses)
+        // Route is GET /api/courses/enrolled/:userId
+        const courseRes = await fetch(`http://localhost:5000/api/courses/enrolled/${userId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const coursesData = await courseRes.json();
+        myCourses = Array.isArray(coursesData) ? coursesData.map(c => c.courseCode) : [];
+
+        // 3. Refresh the UI
+        populateTabs();
+        populateCourseDropdown();
+        updateCalendarView('All Courses');
+        displayAllAssessments(allAssessments);
+
+    } catch (err) {
+        console.error("Failed to load data:", err);
+    }
+}
+
+function displayAllAssessments(assessments) {
+    const list = document.getElementById('allAssessmentsList');
+    if (!list) return;
+
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    let filtered = assessments.filter(a => {
+        if (cdFilter === 'completed') return a.isCompleted;
+        if (cdFilter === 'pending') {
+            if (a.isCompleted) return false;
+            if (!a.dueDate) return true;
+            const d = new Date(a.dueDate); d.setHours(0, 0, 0, 0);
+            return d >= today;
+        }
+        if (cdFilter === 'overdue') {
+            if (a.isCompleted || !a.dueDate) return false;
+            const d = new Date(a.dueDate); d.setHours(0, 0, 0, 0);
+            return d < today;
+        }
+        return true;
+    });
+
+    filtered.sort((a, b) => {
+        const da = a.dueDate ? new Date(a.dueDate) : new Date('9999-12-31');
+        const db = b.dueDate ? new Date(b.dueDate) : new Date('9999-12-31');
+        return cdSort === 'date-desc' ? db - da : da - db;
+    });
+
+    if (filtered.length === 0) {
+        list.innerHTML = '<p class="text-secondary" style="text-align:center;padding:2rem;">'
+            + (assessments.length === 0 ? 'No assessments yet.' : 'No assessments match this filter.')
+            + '</p>';
+        return;
+    }
+
+    list.innerHTML = filtered.map(renderAssessmentItem).join('');
+}
+
+function renderAssessmentItem(a) {
+    const t = new Date(); t.setHours(0, 0, 0, 0);
+    const isOverdue = !a.isCompleted && a.dueDate &&
+        (() => { const d = new Date(a.dueDate); d.setHours(0, 0, 0, 0); return d < t; })();
+    const badgeClass = a.isCompleted ? 'badge-success' : isOverdue ? 'badge-danger' : 'badge-warning';
+    const statusText = a.isCompleted ? 'Completed' : isOverdue ? 'Overdue' : 'Pending';
+    const dueDateStr = a.dueDate ? new Date(a.dueDate).toLocaleDateString() : 'No due date';
+    const id = AUTH.escapeHtml(a._id);
+
+    return `
+    <div class="assessment-item" data-assessment-id="${id}">
+        <div class="flex-between">
+            <div>
+                <h4>${AUTH.escapeHtml(a.courseCode)} - ${AUTH.escapeHtml(a.name)}</h4>
+                <p class="text-secondary">${AUTH.escapeHtml(a.description || 'No description')}</p>
+            </div>
+            <div class="text-right">
+                <span class="badge ${badgeClass}">${statusText}</span>
+                <p class="${isOverdue ? '' : 'text-secondary'} mt-sm" style="${isOverdue ? 'color:#ef4444;' : ''}">Due: ${dueDateStr}</p>
+                <div style="margin-top:0.5rem;display:flex;gap:0.4rem;justify-content:flex-end;">
+                    ${(a.source === 'assessment' || (a.source == null && !(a.isCompleted && a.earnedMarks != null))) ? `<button class="btn btn-secondary" style="padding:0.2rem 0.6rem;font-size:0.8rem;color:${a.isCompleted ? '#f59e0b' : '#10b981'};border-color:${a.isCompleted ? '#f59e0b' : '#10b981'};"
+                        data-action="cd-toggle" data-id="${id}">${a.isCompleted ? 'Mark Pending' : 'Mark Complete'}</button>` : ''}
+                    <button class="btn btn-secondary" style="padding:0.2rem 0.6rem;font-size:0.8rem;"
+                        data-action="cd-edit" data-id="${id}">Edit</button>
+                    <button class="btn btn-secondary" style="padding:0.2rem 0.6rem;font-size:0.8rem;color:#ef4444;border-color:#ef4444;"
+                        data-action="cd-delete" data-id="${id}">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function showCdEditForm(id) {
+    const a = allAssessments.find(x => x._id === id);
+    if (!a) return;
+    const item = document.querySelector(`#allAssessmentsList .assessment-item[data-assessment-id="${id}"]`);
+    if (!item) return;
+
+    item.innerHTML = `
+        <div style="padding: 0.25rem 0;">
+            <div class="flex-between" style="margin-bottom: 1rem;">
+                <h4 style="margin: 0;">Edit Assessment</h4>
+                <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.85rem;"
+                    data-action="cd-cancel-edit">Cancel</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Name</label>
+                    <input type="text" class="search-input" name="name" value="${AUTH.escapeHtml(a.name)}"
+                        style="width: 100%; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Course Code</label>
+                    <input type="text" class="search-input" value="${AUTH.escapeHtml(a.courseCode)}"
+                        style="width: 100%; box-sizing: border-box;" disabled>
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Earned Marks</label>
+                    <input type="number" class="search-input" name="earnedMarks" value="${a.earnedMarks ?? ''}" min="0"
+                        style="width: 100%; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Worth % (Total)</label>
+                    <input type="number" class="search-input" name="totalMarks" value="${a.totalMarks ?? ''}" min="1"
+                        style="width: 100%; box-sizing: border-box;">
+                </div>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Description</label>
+                <input type="text" class="search-input" name="description" value="${AUTH.escapeHtml(a.description || '')}"
+                    style="width: 100%; box-sizing: border-box;">
+            </div>
+            <p id="cd-edit-error" style="color:#ef4444;font-size:0.85rem;margin-top:0.5rem;display:none;"></p>
+            <button class="btn btn-primary" style="width: 100%;"
+                data-action="cd-save-edit" data-id="${AUTH.escapeHtml(a._id)}">Save Changes</button>
+        </div>
+    `;
+}
+
+async function saveCdAssessment(id, container) {
+    const errorEl  = container.querySelector('#cd-edit-error');
+    const showError = msg => { if (errorEl) { errorEl.textContent = msg; errorEl.style.display = 'block'; } };
+
+    const name           = container.querySelector('[name="name"]').value.trim();
+    const earnedMarksVal = container.querySelector('[name="earnedMarks"]').value;
+    const totalMarksVal  = container.querySelector('[name="totalMarks"]').value;
+    const description    = container.querySelector('[name="description"]').value.trim();
+
+    // Name
+    if (!name) { showError('Name cannot be empty.'); return; }
+
+    // Earned marks
+    const earned = earnedMarksVal !== '' ? Number(earnedMarksVal) : undefined;
+    if (earnedMarksVal !== '') {
+        if (isNaN(earned))   { showError('Earned marks must be a number.'); return; }
+        if (earned < 0)      { showError('Earned marks cannot be negative.'); return; }
+        if (earned > 100)    { showError('Earned marks cannot exceed 100.'); return; }
+    }
+
+    // Worth %
+    const total = totalMarksVal !== '' ? Number(totalMarksVal) : undefined;
+    if (totalMarksVal !== '') {
+        if (isNaN(total))  { showError('Worth % must be a number.'); return; }
+        if (total <= 0)    { showError('Worth % must be greater than 0.'); return; }
+        if (total > 100)   { showError('Worth % cannot exceed 100%.'); return; }
+
+        // Cumulative worth check — exclude the assessment being edited
+        const current = allAssessments.find(x => x._id === id);
+        const courseCode = current ? current.courseCode : null;
+        if (courseCode) {
+            const existingWorth = allAssessments
+                .filter(a => a.courseCode === courseCode && (a.source === 'grade' || (a.source == null && a.isCompleted && a.earnedMarks != null)) && a.totalMarks != null && a._id !== id)
+                .reduce((sum, a) => sum + a.totalMarks, 0);
+            if (existingWorth + total > 100) {
+                showError(`Adding ${total}% would exceed 100% for ${courseCode}. You have ${(100 - existingWorth).toFixed(1)}% remaining.`);
+                return;
+            }
+        }
+    }
+
+    const token = localStorage.getItem('token');
+    const res = await fetch(`http://localhost:5000/api/assessments/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name, description, earnedMarks: earned, totalMarks: total })
+    });
+
+    if (res.ok) {
+        await refreshAllAssessments();
+    } else {
+        const data = await res.json();
+        showError(data.message || 'Update failed.');
+    }
+}
+
+async function refreshAllAssessments() {
+    const token = localStorage.getItem('token');
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userId = userData ? userData.id : null;
+    if (!userId) return;
+    try {
+        const res = await fetch(`http://localhost:5000/api/assessments/${userId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const raw = await res.json();
+        allAssessments = Array.isArray(raw) ? raw.map(a => ({
+            ...a, date: a.dueDate ? a.dueDate.substring(0, 10) : null, course: a.courseCode
+        })) : [];
+        displayAllAssessments(allAssessments);
+        const activeTab = document.querySelector('#dynamic-tabs button.active-tab');
+        updateCalendarView(activeTab ? activeTab.textContent : 'All Courses');
+    } catch(err) {
+        console.error('Error refreshing assessments:', err);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function() {
+    loadDataFromServer();
     populateCourseDropdown();
     populateTabs();
+
+    // All Assessments card — filter buttons
+    document.getElementById('cdFilters').addEventListener('click', e => {
+        const btn = e.target.closest('[data-filter]');
+        if (!btn) return;
+        cdFilter = btn.dataset.filter;
+        document.querySelectorAll('#cdFilters [data-filter]').forEach(b => {
+            b.className = b.dataset.filter === cdFilter ? 'btn btn-primary' : 'btn btn-secondary';
+            b.style.cssText = 'padding:0.25rem 0.75rem;font-size:0.8rem;';
+        });
+        displayAllAssessments(allAssessments);
+    });
+
+    // All Assessments card — sort
+    document.getElementById('cdSort').addEventListener('change', e => {
+        cdSort = e.target.value;
+        displayAllAssessments(allAssessments);
+    });
+
+    // All Assessments card — Mark Complete/Pending + Delete
+    document.getElementById('allAssessmentsList').addEventListener('click', async e => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const id     = btn.dataset.id;
+        const token  = localStorage.getItem('token');
+
+        if (action === 'cd-edit')        { showCdEditForm(id); return; }
+        if (action === 'cd-cancel-edit') {
+            const item = btn.closest('.assessment-item');
+            const a = allAssessments.find(x => x._id === item.dataset.assessmentId);
+            if (a) item.outerHTML = renderAssessmentItem(a);
+            return;
+        }
+        if (action === 'cd-save-edit')   { await saveCdAssessment(id, btn.closest('.assessment-item')); return; }
+
+        if (action === 'cd-toggle') {
+            const a = allAssessments.find(x => x._id === id);
+            if (!a) return;
+            await fetch(`http://localhost:5000/api/assessments/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ isCompleted: !a.isCompleted })
+            });
+            await refreshAllAssessments();
+        }
+
+        if (action === 'cd-delete') {
+            if (!confirm('Delete this assessment? This cannot be undone.')) return;
+            await fetch(`http://localhost:5000/api/assessments/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            await refreshAllAssessments();
+        }
+    });
     
     var calendarEl = document.getElementById('calendar');
     calendar = new FullCalendar.Calendar(calendarEl, {
@@ -88,7 +373,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCalendarView('All Courses');
 });
 
-function saveNewAssessment() {
+async function saveNewAssessment() {
+    const token = localStorage.getItem('token');
     const assessmentCard = document.getElementById('assessment-card');
     const name = document.getElementById('assessment-name-input').value;
     const desc = document.getElementById('assessment-desc-input').value; 
@@ -100,63 +386,35 @@ function saveNewAssessment() {
         return;
     }
 
-    // 1. Push to master array
-    allAssessments.push({
-        name: name,
-        description: desc,
-        date: date,
-        course: course
-    });
-
-    // 2. SAFETY NET: Find active tab, default to 'All Courses' if none are clicked
-    const activeTabBtn = document.querySelector('.tab-btn.btn-primary');
-    const activeTab = activeTabBtn ? activeTabBtn.textContent : 'All Courses';
-    
-    // Instantly draw to the calendar
-    updateCalendarView(activeTab); 
-
-    // 3. Instantly update the Daily Overview list (The SMART way)
-    const listContainer = document.getElementById('daily-event-list');
-    listContainer.innerHTML = ''; // Completely wipe the old HTML clean!
-
-    // Find all events for this specific day in the master array
-    const eventsToday = allAssessments.filter(a => a.date === date);
-
-    if (eventsToday.length === 0) {
-        listContainer.innerHTML = '<p class="text-muted" style="margin-bottom: 20px;">No tasks scheduled for this day.</p>';
-    } else {
-        // Redraw every task for today from scratch so there are zero duplicates
-        eventsToday.forEach(event => {
-            let blockColor = courseColors[event.course] || '#2563eb';
-            listContainer.innerHTML += `
-                <div class="task-item" style="border-left: 4px solid ${blockColor}; padding-left: 12px;">
-                    <div>
-                        <h4 style="margin: 0; color: #1e293b;">${event.course}: ${event.name}</h4>
-                        <p class="text-secondary" style="margin: 4px 0 0 0; font-size: 0.9rem;">${event.description || 'No description provided.'}</p>
-                    </div>
-                    
-                    <div class="task-actions">
-                        <button class="action-btn edit-btn" onclick="editTask('${event.name}', '${event.date}')" title="Edit">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </button>
-                        <button class="action-btn delete-btn" onclick="deleteTask('${event.name}', '${event.date}', this)" title="Delete">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
-                    </div>
-                </div>
-            `;
+    // NEW: Send the task to Liam's server to be saved in MongoDB
+    try {
+        await fetch('http://localhost:5000/api/assessments', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({
+                name: name,
+                description: desc,
+                dueDate: date, // Matches Ray's model name
+                courseCode: course
+            })
         });
-    }
 
-    // 4. Reset inputs
-    document.getElementById('assessment-name-input').value = '';
-    document.getElementById('assessment-desc-input').value = '';
-    
-    // 5. Hide form and instantly go back to the newly updated Daily View
-    assessmentCard.style.display = 'none';
-    document.getElementById('daily-info-card').style.display = 'block';
-    
-    window.dispatchEvent(new Event('resize'));
+        // After saving, reload everything from the server so the calendar updates
+        await loadDataFromServer();
+
+        // Reset UI
+        document.getElementById('assessment-name-input').value = '';
+        document.getElementById('assessment-desc-input').value = '';
+        assessmentCard.style.display = 'none';
+        document.getElementById('daily-info-card').style.display = 'block';
+        window.dispatchEvent(new Event('resize'));
+
+    } catch (err) {
+        console.error("Error saving assessment:", err);
+    }
 }
 
 // 3. TAB LOGIC: Controls what cards are visible
@@ -259,12 +517,18 @@ function showAddAssessmentForm() {
     const dailyCard = document.getElementById('daily-info-card');
     const date = dailyCard.getAttribute('data-selected-date');
 
-    //hiding the daily view and show form 
-    dailyCard.style.display = 'none'
+    // Guard: user must click a calendar date before adding an assessment
+    if (!date) {
+        alert('Please click a date on the calendar first.');
+        return;
+    }
+
+    //hiding the daily view and show form
+    dailyCard.style.display = 'none';
     const assessmentCard = document.getElementById('assessment-card');
     assessmentCard.style.display = 'block';
 
-    //passing the new data to the form 
+    //passing the new data to the form
     assessmentCard.setAttribute('data-selected-date', date);
     document.getElementById('selected-date-header').innerText = "Add Assessment";
     document.getElementById('selected-date-subtitle').innerText = "Scheduling for: " + date;
@@ -330,99 +594,103 @@ function editTask(taskName, taskDate) {
     updateCalendarView(activeTab);
 }
 
-function saveNewGrade() {
-    // 1. Find out which tab is currently selected
-    let activeTabBtn = document.querySelector('.tab-btn.btn-primary');
-    if (!activeTabBtn || activeTabBtn.textContent === 'All Courses') {
-        alert("Please select a specific course tab before adding a grade!");
-        return;
-    }
-    let courseName = activeTabBtn.textContent;
+async function saveNewGrade() {
+    const errorEl   = document.getElementById('grade-error');
+    const successEl = document.getElementById('grade-success');
+    const showError = msg => { errorEl.textContent = msg; errorEl.style.display = 'block'; successEl.style.display = 'none'; };
+    const clearMsgs = ()  => { errorEl.style.display = 'none'; successEl.style.display = 'none'; };
 
-    // 2. Grab the inputs (FIXED THE IDs HERE to match your HTML!)
-    let name = document.getElementById('grade-name-input').value;
-    let earned = parseFloat(document.getElementById('earned').value);
-    let total = parseFloat(document.getElementById('total').value);
+    clearMsgs();
 
-    if (!name || isNaN(earned) || isNaN(total)) {
-        alert("Please fill in all grade fields with valid numbers.");
+    // 1. Must have a specific course tab selected (not "All Courses")
+    const activeTabBtn = document.querySelector('.tab-btn.btn-primary');
+    const courseCode = activeTabBtn ? activeTabBtn.textContent.trim() : '';
+    if (!courseCode || courseCode === 'All Courses') {
+        showError('Please select a specific course tab before saving a grade.');
         return;
     }
 
-    // 3. Save it to the array
-    courseGrades[courseName].push({ name: name, earned: earned, total: total });
+    // 2. Name cannot be empty
+    const name = document.getElementById('grade-name-input').value.trim();
+    if (!name) { showError('Evaluation name cannot be empty.'); return; }
 
-    // 4. PUSH TO THE BROWSER MEMORY (This is what Raymond's file will read!)
-    localStorage.setItem('sharedCourseGrades', JSON.stringify(courseGrades));
+    // 3. Earned marks validation
+    const earnedRaw = document.getElementById('earned').value;
+    if (earnedRaw === '') { showError('Earned marks cannot be empty.'); return; }
+    const earnedMarks = parseFloat(earnedRaw);
+    if (isNaN(earnedMarks))       { showError('Earned marks must be a number.'); return; }
+    if (earnedMarks < 0)          { showError('Earned marks cannot be negative.'); return; }
+    if (earnedMarks > 100)        { showError('Earned marks cannot exceed 100.'); return; }
 
-    // 5. Update your top header instantly
-    updateCourseAverage(courseName);
+    // 4. Worth % validation
+    const worthRaw = document.getElementById('total').value;
+    if (worthRaw === '') { showError('Worth % cannot be empty.'); return; }
+    const worthPct = parseFloat(worthRaw);
+    if (isNaN(worthPct))    { showError('Worth % must be a number.'); return; }
+    if (worthPct <= 0)      { showError('Worth % must be greater than 0.'); return; }
+    if (worthPct > 100)     { showError('Worth % cannot exceed 100%.'); return; }
 
-    // 6. Clear inputs
-    document.getElementById('grade-name-input').value = '';
-    document.getElementById('earned').value = '';
-    document.getElementById('total').value = '';
+    // 5. Cumulative worth % for this course cannot exceed 100%
+    const existingWorth = allAssessments
+        .filter(a => a.courseCode === courseCode && (a.source === 'grade' || (a.source == null && a.isCompleted && a.earnedMarks != null)) && a.totalMarks != null)
+        .reduce((sum, a) => sum + a.totalMarks, 0);
+    if (existingWorth >= 100) {
+        showError('This course is already fully weighted (100%). You cannot add more grades unless weights are adjusted.');
+        return;
+    }
+    if (existingWorth + worthPct > 100) {
+        showError(`Adding ${worthPct}% would exceed 100%. You have ${(100 - existingWorth).toFixed(1)}% remaining.`);
+        return;
+    }
+
+    // 6. Save
+    const token = localStorage.getItem('token');
+    try {
+        const response = await fetch('http://localhost:5000/api/assessments/add-grade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ courseCode, name, earnedMarks, totalMarks: worthPct })
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            showError(data.message || 'Failed to save grade.');
+            return;
+        }
+
+        const result = await response.json();
+        document.getElementById('average-display').innerText = result.serverCalculatedAverage + '%';
+
+        // Clear form
+        document.getElementById('grade-name-input').value = '';
+        document.getElementById('earned').value = '';
+        document.getElementById('total').value = '';
+
+        successEl.textContent = 'Grade saved successfully!';
+        successEl.style.display = 'block';
+        setTimeout(() => { successEl.style.display = 'none'; }, 3000);
+
+        await refreshAllAssessments();
+    } catch (err) {
+        console.error('Error saving grade:', err);
+        showError('An error occurred. Please try again.');
+    }
 }
 
-function updateCourseAverage(courseName) {
+async function updateCourseAverage(courseName) {
     const display = document.getElementById('average-display');
-    
+    const token = localStorage.getItem('token');
+
     if (courseName === 'All Courses' || courseName === 'All') {
-        let totalPercentages = 0;
-        let activeCourses = 0;
-
-        // Loop through every course in your database
-        for (let course in courseGrades) {
-            let grades = courseGrades[course];
-            
-            if (grades && grades.length > 0) {
-                let courseWeight = 0;
-                let courseSum = 0;
-
-                // Calculate this specific course's average
-                grades.forEach(g => {
-                    courseWeight += g.total;
-                    courseSum += (g.earned * g.total);
-                });
-
-                // Add this course's average to our grand total
-                if (courseWeight > 0) {
-                    totalPercentages += (courseSum / courseWeight);
-                    activeCourses++;
-                }
-            }
-        }
-
-        // If you have no grades in ANY course yet
-        if (activeCourses === 0) {
-            display.innerText = '--%';
-        } else {
-            // Divide the sum of course averages by the number of active courses
-            let overall = (totalPercentages / activeCourses).toFixed(1);
-            display.innerText = overall + '%';
-        }
-        return;
-    }
-    
-    let grades = courseGrades[courseName];
-    if (!grades || grades.length === 0) {
-        display.innerText = '--%';
+        display.innerText = "Dashboard View"; // Or a general avg if you want to write a route for it
         return;
     }
 
-    let totalWeight = 0;
-    let weightedSum = 0;
-    
-    grades.forEach(g => {
-        totalWeight += g.total; 
-        weightedSum += (g.earned * g.total); 
+    // Ask the server for the calculation
+    const response = await fetch(`http://localhost:5000/api/assessments/average/${courseName}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
     });
-
-    if (totalWeight === 0) {
-        display.innerText = '--%';
-        return;
-    }
-
-    let average = (weightedSum / totalWeight).toFixed(1); 
-    display.innerText = average + '%';
+    const data = await response.json();
+    
+    display.innerText = data.average + "%";
 }
