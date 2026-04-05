@@ -1,5 +1,6 @@
 // 1. Loading env variables
-require('dotenv').config(); 
+require('dotenv').config();
+require('./utils/cronJobs');
 
 const express = require('express');
 const mongoose = require('mongoose'); // Import Mongoose
