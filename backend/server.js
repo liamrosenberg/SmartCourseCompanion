@@ -1,9 +1,9 @@
-// 1. Loading env variables
+// Loading env variables and cron jobs
 require('dotenv').config();
 require('./utils/cronJobs');
 
 const express = require('express');
-const mongoose = require('mongoose'); // Import Mongoose
+const mongoose = require('mongoose');
 const cors = require('cors');
 const courseRoutes = require('./routes/courses');
 const assessmentRoutes = require('./routes/assessments');
@@ -18,7 +18,7 @@ app.use(express.json());
 app.use('/api/courses', verifyToken, courseRoutes);
 app.use('/api/assessments', verifyToken, assessmentRoutes);
 
-// 2. Connecting to MongoDB Atlas
+// Connecting to database
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log('Successfully connected to MongoDB Atlas!');
@@ -27,11 +27,11 @@ mongoose.connect(process.env.MONGO_URI)
         console.error('Error connecting to MongoDB:', error.message);
     });
 
-// 3. Define Routes (We will add the Auth routes here next!)
+// Defining routes
 app.get('/', (req, res) => {
     res.send('Smart Course Companion Server is running and connected to the database!');
 });
-// Import Routes
+// Importing auth routes
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 

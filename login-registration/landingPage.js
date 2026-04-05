@@ -31,12 +31,10 @@ document.querySelectorAll('.close-modal-btn').forEach(button => {
     button.addEventListener('click', closeModal);
 });
 
-// --- NEW AUTHENTICATION LOGIC ---
-
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 
-// 1. Handle Login
+// Handling login
 async function handleLogin(event) {
     event.preventDefault(); 
 
@@ -79,7 +77,7 @@ async function handleLogin(event) {
     }
 }
 
-// 2. Handle Registration
+// Handling registration
 async function handleRegister(event) {
     event.preventDefault();
 
@@ -125,6 +123,6 @@ async function handleRegister(event) {
     }
 }
 
-// Attach the new functions to the forms
+// Attaching to the forms
 if (loginForm) loginForm.addEventListener('submit', handleLogin);
 if (registerForm) registerForm.addEventListener('submit', handleRegister);
