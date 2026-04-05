@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGO_URI)
         console.error('Error connecting to MongoDB:', error.message);
     });
 
-// 3. Define Routes (We will add the Auth routes here next!)
+// 3. Define Routes
 app.get('/', (req, res) => {
     res.send('Smart Course Companion Server is running and connected to the database!');
 });

@@ -33,7 +33,7 @@ router.post('/', async (req, res) => {
 // POST: Save grade and calculate average on server
 router.post('/add-grade', verifyToken, async (req, res) => {
     const { courseCode, name, earnedMarks, totalMarks } = req.body;
-    
+
     const newEntry = new Assessment({
         user: req.user.id, // From Liam's token
         courseCode,
@@ -57,10 +57,10 @@ router.post('/add-grade', verifyToken, async (req, res) => {
 router.get('/average/:courseCode', verifyToken, async (req, res) => {
     try {
         const { courseCode } = req.params;
-        const allGrades = await Assessment.find({ 
-            user: req.user.id, 
+        const allGrades = await Assessment.find({
+            user: req.user.id,
             courseCode,
-            earnedMarks: { $exists: true } 
+            earnedMarks: { $exists: true }
         });
 
         if (allGrades.length === 0) return res.json({ average: "--" });
@@ -77,7 +77,6 @@ router.get('/average/:courseCode', verifyToken, async (req, res) => {
 // PUT /api/assessments/:assessmentId — update an assessment the logged-in user owns
 router.put('/:assessmentId', async (req, res) => {
     try {
-        // findOne with user: req.user.id ensures students can only edit their own records
         const assessment = await Assessment.findOne({
             _id: req.params.assessmentId,
             user: req.user.id

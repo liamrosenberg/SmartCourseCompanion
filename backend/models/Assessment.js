@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const assessmentSchema = new mongoose.Schema({
-    user: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', 
-        required: true 
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
     courseCode: { type: String, required: true },
     name: { type: String, required: true },
