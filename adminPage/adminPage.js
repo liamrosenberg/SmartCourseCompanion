@@ -10,7 +10,7 @@ async function fetchAdminCourses() {
     if (!token) { window.location.href = "../landingPage.html"; return; }
 
     try {
-        const response = await fetch('http://localhost:5000/api/courses', {
+        const response = await fetch('http://localhost:5000/api/courses/all', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
