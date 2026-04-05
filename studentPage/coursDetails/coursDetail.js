@@ -14,12 +14,18 @@ const courseColors = {
     "General":  "#64748b"  // Slate Gray
 };
 
+<<<<<<< HEAD
 //master array with all the classes
 let allAssessments = [];
 
 let cdFilter = 'all';
 let cdSort   = 'date-asc';
 
+=======
+//master array with all the classes 
+let allAssessments = [];
+
+>>>>>>> Ray-StudentDashboard
 async function loadDataFromServer() {
     const token = localStorage.getItem('token');
     const userData = JSON.parse(localStorage.getItem('user'));
@@ -55,12 +61,16 @@ async function loadDataFromServer() {
         populateTabs();
         populateCourseDropdown();
         updateCalendarView('All Courses');
+<<<<<<< HEAD
         displayAllAssessments(allAssessments);
+=======
+>>>>>>> Ray-StudentDashboard
 
     } catch (err) {
         console.error("Failed to load data:", err);
     }
 }
+<<<<<<< HEAD
 
 function displayAllAssessments(assessments) {
     const list = document.getElementById('allAssessmentsList');
@@ -254,6 +264,8 @@ async function refreshAllAssessments() {
         console.error('Error refreshing assessments:', err);
     }
 }
+=======
+>>>>>>> Ray-StudentDashboard
 
 document.addEventListener('DOMContentLoaded', function() {
     loadDataFromServer();
@@ -595,6 +607,7 @@ function editTask(taskName, taskDate) {
 }
 
 async function saveNewGrade() {
+<<<<<<< HEAD
     const errorEl   = document.getElementById('grade-error');
     const successEl = document.getElementById('grade-success');
     const showError = msg => { errorEl.textContent = msg; errorEl.style.display = 'block'; successEl.style.display = 'none'; };
@@ -690,6 +703,46 @@ async function updateCourseAverage(courseName) {
     const response = await fetch(`http://localhost:5000/api/assessments/average/${courseName}`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
+=======
+    const token = localStorage.getItem('token');
+    const activeTabBtn = document.querySelector('.tab-btn.btn-primary');
+    const courseCode = activeTabBtn.textContent;
+
+    const payload = {
+        courseCode: courseCode,
+        name: document.getElementById('grade-name-input').value,
+        earnedMarks: parseFloat(document.getElementById('earned').value),
+        totalMarks: parseFloat(document.getElementById('total').value)
+    };
+
+    const response = await fetch('http://localhost:5000/api/assessments/add-grade', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    // Use the average the SERVER calculated 
+    document.getElementById('average-display').innerText = result.serverCalculatedAverage + "%";
+}
+
+async function updateCourseAverage(courseName) {
+    const display = document.getElementById('average-display');
+    const token = localStorage.getItem('token');
+
+    if (courseName === 'All Courses' || courseName === 'All') {
+        display.innerText = "Dashboard View"; // Or a general avg if you want to write a route for it
+        return;
+    }
+
+    // Ask the server for the calculation
+    const response = await fetch(`http://localhost:5000/api/assessments/average/${courseName}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+>>>>>>> Ray-StudentDashboard
     const data = await response.json();
     
     display.innerText = data.average + "%";
