@@ -12,6 +12,8 @@ const user = AUTH.getUser();
 
 // used by the edit form and cancel action
 let currentAssessments = [];
+// full list used for cumulative worth validation
+let allFetchedAssessments = [];
 
 // Chart instances — kept so we can destroy them before re-rendering on refresh
 let barChart = null;
@@ -77,6 +79,8 @@ async function loadAssessments(){
 
         const assessments = await response.json();
 
+        // Cache full list for cumulative worth validation
+        allFetchedAssessments = assessments;
         // Cache displayed slice so the edit form can read field values
         currentAssessments = assessments.slice(0, 3);
         displayAssessments(currentAssessments);
@@ -96,9 +100,13 @@ function displayAssessments(assessments){
     }
 
     assessmentList.innerHTML = assessments.map(assessment => {
-        const status = assessment.isCompleted ? 'success' : 'warning';
-        const statusText = assessment.isCompleted ? 'Completed' : 'Pending';
-        const dueDate = assessment.dueDate ? new Date(assessment.dueDate).toLocaleDateString() : 'No due date';
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const isOverdue = !assessment.isCompleted && assessment.dueDate &&
+            (() => { const d = new Date(assessment.dueDate); d.setHours(0, 0, 0, 0); return d < today; })();
+        const status = assessment.isCompleted ? 'success' : isOverdue ? 'danger' : 'warning';
+        const statusText = assessment.isCompleted ? 'Completed' : isOverdue ? 'Overdue' : 'Pending';
+        const dueDateStr = assessment.dueDate ? new Date(assessment.dueDate).toLocaleDateString() : 'No due date';
+        const dueDate = dueDateStr;
         const id = AUTH.escapeHtml(assessment._id);
 
         // Use AUTH.escapeHtml on all user-supplied fields
@@ -111,8 +119,10 @@ function displayAssessments(assessments){
                 </div>
                 <div class="text-right">
                     <span class="badge badge-${status}">${statusText}</span>
-                    <p class="text-secondary mt-sm">Due: ${dueDate}</p>
+                    <p class="${isOverdue ? '' : 'text-secondary'} mt-sm" style="${isOverdue ? 'color: #ef4444;' : ''}">Due: ${dueDate}</p>
                     <div style="margin-top: 0.5rem; display: flex; gap: 0.4rem; justify-content: flex-end;">
+                        ${(assessment.source === 'assessment' || (assessment.source == null && !(assessment.isCompleted && assessment.earnedMarks != null))) ? `<button class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.8rem; color: ${assessment.isCompleted ? '#f59e0b' : '#10b981'}; border-color: ${assessment.isCompleted ? '#f59e0b' : '#10b981'};"
+                            data-action="toggle-complete" data-id="${id}">${assessment.isCompleted ? 'Mark Pending' : 'Mark Complete'}</button>` : ''}
                         <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;"
                             data-action="edit" data-id="${id}">Edit</button>
                         <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.8rem; color: #ef4444; border-color: #ef4444;"
@@ -129,6 +139,9 @@ function displayAssessments(assessments){
 
 
 document.addEventListener('DOMContentLoaded', function() {
+    const nameEl = document.getElementById('welcomeName');
+    if (nameEl) nameEl.textContent = user.username || 'Student';
+
     loadDashboardData();
 
     document.getElementById('exportGradesBtn').addEventListener('click', exportGradesToCSV);
@@ -144,6 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const action = button.dataset.action;
         const id     = button.dataset.id;
 
+        if (action === 'toggle-complete') await toggleAssessmentComplete(id);
         if (action === 'edit')        showEditForm(id);
         if (action === 'delete')      await deleteAssessment(id);
         if (action === 'cancel-edit') displayAssessments(currentAssessments);
@@ -184,7 +198,10 @@ async function exportGradesToCSV() {
                 ? ((a.earnedMarks / a.totalMarks) * 100).toFixed(1)
                 : '--';
             const due    = a.dueDate ? new Date(a.dueDate).toLocaleDateString() : '';
-            const status = a.isCompleted ? 'Completed' : 'Pending';
+            const today  = new Date(); today.setHours(0, 0, 0, 0);
+            const isOverdue = !a.isCompleted && a.dueDate &&
+                (() => { const d = new Date(a.dueDate); d.setHours(0, 0, 0, 0); return d < today; })();
+            const status = a.isCompleted ? 'Completed' : isOverdue ? 'Overdue' : 'Pending';
 
             // Wrap text fields in quotes; double any internal quotes to stay valid CSV
             const q = str => `"${String(str || '').replace(/"/g, '""')}"`;
@@ -242,8 +259,33 @@ async function refreshDashboard() {
 }
 
 // ============================================
-// ASSESSMENT EDIT / DELETE
+// ASSESSMENT EDIT / DELETE / TOGGLE
 // ============================================
+
+async function toggleAssessmentComplete(id) {
+    const a = currentAssessments.find(x => x._id === id);
+    if (!a) return;
+
+    try {
+        const response = await AUTH.fetch(`${API_URL}/api/assessments/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ isCompleted: !a.isCompleted })
+        });
+
+        if (!response) return;
+
+        if (response.ok) {
+            showToast(a.isCompleted ? 'Marked as pending.' : 'Marked as complete!', a.isCompleted ? 'warning' : 'success');
+            await refreshDashboard();
+        } else {
+            const data = await response.json();
+            showToast(data.message || 'Update failed.', 'error');
+        }
+    } catch (error) {
+        console.error('Error toggling assessment:', error);
+        showToast('Failed to update. Please try again.', 'error');
+    }
+}
 
 function showEditForm(id) {
     const a = currentAssessments.find(x => x._id === id);
@@ -276,7 +318,7 @@ function showEditForm(id) {
                         style="width: 100%; box-sizing: border-box;">
                 </div>
                 <div>
-                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Total Marks</label>
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">Worth % (Total)</label>
                     <input type="number" class="search-input" name="totalMarks" value="${a.totalMarks ?? ''}" min="1"
                         style="width: 100%; box-sizing: border-box;">
                 </div>
@@ -286,6 +328,7 @@ function showEditForm(id) {
                 <input type="text" class="search-input" name="description" value="${AUTH.escapeHtml(a.description || '')}"
                     style="width: 100%; box-sizing: border-box;">
             </div>
+            <p id="dash-edit-error" style="color:#ef4444;font-size:0.85rem;margin-top:0.5rem;display:none;"></p>
             <button class="btn btn-primary" style="width: 100%;"
                 data-action="save-edit" data-id="${AUTH.escapeHtml(a._id)}">Save Changes</button>
         </div>
@@ -294,12 +337,33 @@ function showEditForm(id) {
 
 // Reads the inline form values and PUT /api/assessments/:id
 async function saveAssessment(id, container) {
+    const errorEl   = container.querySelector('#dash-edit-error');
+    const showError = msg => { errorEl.textContent = msg; errorEl.style.display = 'block'; };
+
     const name = container.querySelector('[name="name"]').value.trim();
     const earnedMarksVal = container.querySelector('[name="earnedMarks"]').value;
     const totalMarksVal  = container.querySelector('[name="totalMarks"]').value;
     const description    = container.querySelector('[name="description"]').value.trim();
 
-    if (!name) { showToast('Name cannot be empty.', 'error'); return; }
+    if (!name) { showError('Name cannot be empty.'); return; }
+
+    // Worth % cumulative validation
+    if (totalMarksVal !== '') {
+        const total = Number(totalMarksVal);
+        if (isNaN(total) || total <= 0 || total > 100) {
+            showError('Worth % must be between 1 and 100.'); return;
+        }
+        const current = allFetchedAssessments.find(x => x._id === id);
+        const courseCode = current ? current.courseCode : null;
+        if (courseCode) {
+            const existingWorth = allFetchedAssessments
+                .filter(a => a.courseCode === courseCode && (a.source === 'grade' || (a.source == null && a.isCompleted && a.earnedMarks != null)) && a.totalMarks != null && a._id !== id)
+                .reduce((sum, a) => sum + a.totalMarks, 0);
+            if (existingWorth + total > 100) {
+                showError(`Adding ${total}% would exceed 100% for ${courseCode}. You have ${(100 - existingWorth).toFixed(1)}% remaining.`); return;
+            }
+        }
+    }
 
     try {
         const response = await AUTH.fetch(`${API_URL}/api/assessments/${id}`, {
@@ -319,11 +383,11 @@ async function saveAssessment(id, container) {
             await refreshDashboard();
         } else {
             const data = await response.json();
-            showToast(data.message || 'Update failed.', 'error');
+            showError(data.message || 'Update failed.');
         }
     } catch (error) {
         console.error('Error updating assessment:', error);
-        showToast('Failed to update. Please try again.', 'error');
+        showError('Failed to update. Please try again.');
     }
 }
 
@@ -363,7 +427,7 @@ function showToast(message, type) {
         position: fixed; bottom: 2rem; right: 2rem;
         padding: 0.875rem 1.5rem; border-radius: 8px;
         color: #fff; font-weight: 500; font-size: 0.95rem; z-index: 9999;
-        background-color: ${type === 'success' ? '#10b981' : '#ef4444'};
+        background-color: ${type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#ef4444'};
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     `;
     document.body.appendChild(toast);

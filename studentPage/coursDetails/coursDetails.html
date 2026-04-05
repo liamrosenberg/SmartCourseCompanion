@@ -42,7 +42,31 @@
         </div>
     </header>
     <div class="container">
-        <div id="dynamic-tabs" class="course-filter" style="display: flex; gap: 15px; margin-top: 20px; margin-bottom: 20px;"></div>
+        <!-- All Assessments Card -->
+        <div class="card mb-xl">
+            <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+                <h2 class="card-title">All Assessments</h2>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 0.35rem;" id="cdFilters">
+                        <button class="btn btn-primary"   data-filter="all"       style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">All</button>
+                        <button class="btn btn-secondary" data-filter="pending"   style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">Pending</button>
+                        <button class="btn btn-secondary" data-filter="completed" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">Completed</button>
+                        <button class="btn btn-secondary" data-filter="overdue"   style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">Overdue</button>
+                    </div>
+                    <select id="cdSort" class="search-input" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto;">
+                        <option value="date-asc">Due Date ↑</option>
+                        <option value="date-desc">Due Date ↓</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="assessment-list" id="allAssessmentsList">
+                    <p class="text-secondary" style="text-align:center; padding:2rem;">Loading assessments...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="dynamic-tabs" class="course-filter" style="display: flex; gap: 15px; margin-bottom: 20px;"></div>
         <div class="split-screen">
             <div id="calendar"></div>
     
@@ -95,6 +119,8 @@
                             <label class="stat-label mt-sm">Worth % (Total)</label>
                             <input type="number" class="search-input mb-sm" id="total" placeholder="e.g. 100">
 
+                            <p id="grade-error"   style="color:#ef4444;font-size:0.85rem;margin-top:0.5rem;display:none;"></p>
+                            <p id="grade-success" style="color:#10b981;font-size:0.85rem;margin-top:0.5rem;display:none;"></p>
                             <div class="mt-lg">
                                 <button class="btn btn-primary btn-block" onclick="saveNewGrade()">Save Grade</button>
                             </div>
@@ -106,6 +132,7 @@
     </div>
 
 
+<script src="../auth.js"></script>
 <script src="coursDetail.js"></script>
 <script src="../../components/ToggleTheme/toggle-theme.js"></script>
 </body>

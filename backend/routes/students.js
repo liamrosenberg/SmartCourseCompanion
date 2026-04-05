@@ -29,10 +29,9 @@ router.get('/:userId/stats', async (req, res) =>{
         let overallAverage = 0;
 
         if (completedAssessment.length > 0){
-            const totalPercentage = completedAssessment.reduce((sum, a) => {
-                return sum + (a.earnedMarks / a.totalMarks * 100);
-            }, 0);
-            overallAverage = (totalPercentage / completedAssessment.length).toFixed(1);
+            const weightedSum = completedAssessment.reduce((sum, a) => sum + (a.earnedMarks * a.totalMarks), 0);
+            const worthSum    = completedAssessment.reduce((sum, a) => sum + a.totalMarks, 0);
+            overallAverage    = (weightedSum / worthSum).toFixed(1);
         }
 
         // Get course avg for chart
@@ -43,9 +42,9 @@ router.get('/:userId/stats', async (req, res) =>{
             );
 
             if (courseAssessments.length > 0){
-                const avg = courseAssessments.reduce((sum, a) => {
-                    return sum + (a.earnedMarks / a.totalMarks * 100);
-                }, 0) / courseAssessments.length;
+                const weightedSum = courseAssessments.reduce((sum, a) => sum + (a.earnedMarks * a.totalMarks), 0);
+                const worthSum    = courseAssessments.reduce((sum, a) => sum + a.totalMarks, 0);
+                const avg         = weightedSum / worthSum;
 
                 courseAverage[course.courseCode] = {
                     courseName: course.courseName,
@@ -74,7 +73,7 @@ router.get('/:userId/stats', async (req, res) =>{
         res.json({
             activeCourses,
             overallAverage,
-            pendingAssessments,
+            pendingAssessments: pendingCount,
             courseAverage,
             assessmentProgress: {
                 completed: completedCount,
