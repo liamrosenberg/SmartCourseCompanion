@@ -317,4 +317,14 @@ function setupSearchBar() {
             }
         });
     }
+    
 }
+// Function to handle logout
+function handleLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    alert("You have been logged out.");
+    window.location.href = "../login-registration/landingPage.html";
+}
+document.getElementById('logoutBtn').addEventListener('click', handleLogout);

@@ -1,156 +1,3 @@
-<<<<<<< HEAD
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name ="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Student Dashboard</title>
-        <!-- Global Styles-->
-        <link rel="stylesheet" href="../css/style.css">
-
-        <!--Charts Styles-->
-        <link rel="stylesheet" href="../studentPage/charts.css">
-
-        <!-- Theme Toggle Styles -->
-        <link rel="stylesheet" href="../components/ToggleTheme/toggleStyle.css">
-
-    </head>
-
-    <body>
-        <header class="dashboard-header">
-    <div class="container flex-between" style="align-items: center;">
-        <div>
-            <h1>Dashboard</h1>
-            <p class="text-secondary">Welcome back, <span id="welcomeName"></span></p>
-        </div>
-        <div id="toggle-slot"></div>
-    </div>
-</header>
-
-        <main class="main-content">
-            <div class="container">
-
-                <section>
-                    <div class="grid grid-3">
-
-                        <!-- Card 1 -->
-                         <div class="card stat-card">
-                            <div class="card-body text-center">
-                                <div class="stat-number text-primary">5</div>
-                                <div class="stat-label">Active Courses</div>
-                            </div>
-                         </div>
-
-                         <!-- Card 2 -->
-
-                          <div class="card stat-card">
-                            <div class="card-body text-center">
-                                <div class="stat-number text-success">85.4%</div>
-                                <div class="stat-label">Overall Average</div>
-                            </div>
-                         </div>
-
-                         <!-- Card 3 -->
-
-                          <div class="card stat-card">
-                            <div class="card-body text-center">
-                                <div class="stat-number text-warning">7</div>
-                                <div class="stat-label">Pending Assessments</div>
-                            </div>
-                         </div>
-
-                    </div>
-                </section>
-
-                <!-- Upcoming Assessments Section -->
-                 <section class="mb-xl">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Assessments</h2>
-                            <a href="coursDetails/coursDetails.html" class="text-primary">View All</a>
-                        </div>
-                        <div class="card-body">
-                            <div class="assessment-list">
-
-                                <!-- Assessments will be loaded from js code-->
-
-                                </div>
-
-                            </div>
-                        </div>
-                 </section>
-
-                 <!-- Visual Summary -->
-
-                 <section class="mb-xl">
-                    <h2 class="mb-lg">Performative Overview</h2>
-
-                    <div class="grid grid-2">
-
-                        <!-- Chart 1: Course Grades -->
-                         <div class="card">
-                              <div class="card-header">
-                                <h3 class="card-title">Course Averages</h3>
-                              </div>
-                              <div class="card-body">
-                                <div class="chart-container">
-                                     <canvas id="courseGradesChart"></canvas>
-                                </div>
-                              </div>
-                         </div>
-
-
-                          <!-- Chart 2: Assessment Progress -->
-                         <div class="card">
-                              <div class="card-header">
-                                <h3 class="card-title">Assessment Progress</h3>
-                              </div>
-                              <div class="card-body">
-                                <div class="chart-container">
-                                     <canvas id="assessmentProgressChart"></canvas>
-                                </div>
-                              </div>
-                         </div>
-                    </div>
-                 </section>
-
-                 <!-- Quick Actions -->
-                 <section class="mb-xl">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h3>Quick Actions</h3>
-                            <p class="text-secondary">Common tasks and tools</p>
-                            <div class="button-group mt-lg">
-                                <a href="courseBrowse.html" class="btn btn-primary">Browse Courses</a>
-                                <a href="gpaCalculator.html" class="btn btn-secondary">GPA Calculator</a>
-                                <button class="btn btn-secondary" id="exportGradesBtn">Export Grades</button>
-                            </div>
-                        </div>
-                    </div>
-                 </section>
-
-            </div>
-
-        </main>
-
-        <!-- SCRIPTS-->
-
-        <!--Auth-->
-        <script src="auth.js"></script>
-
-        <!--Chart.js-->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-        <!-- Link to JavaScript file -->
-    <script src="studentPage.js"></script>
-
-
-    <!-- Theme toggle script -->
-    <script src="../components/ToggleTheme/toggle-theme.js"></script>
-
-    </body>
-</html>
-=======
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -175,7 +22,10 @@
             <h1>Dashboard</h1>
             <p class="text-secondary">Welcome back, Raymond</p>
         </div>
-        <div id="toggle-slot"></div>
+        <div class="button-group mt-lg">
+            <div id="toggle-slot"></div>
+            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+        </div>
     </div>
 </header>
 
@@ -302,4 +152,3 @@
 
     </body>
 </html>
->>>>>>> Ray-StudentDashboard
