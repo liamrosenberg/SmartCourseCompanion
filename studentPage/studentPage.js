@@ -539,3 +539,14 @@ function createDoughnutChartWithData(assessmentProgress) {
         }
     });
 }
+
+// ============================================
+// LOGOUT
+// ============================================
+
+function handleLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = "../login-registration/landingPage.html";
+}
+document.getElementById('logoutBtn').addEventListener('click', handleLogout);
