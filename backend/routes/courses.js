@@ -100,7 +100,7 @@ router.delete('/enroll/:userId/:courseId', async (req, res) => {
 // ADMIN ROUTES
 // =====================
 
-// GET /api/courses/all — all courses for admin dashboard
+// GET /api/courses/all get all courses for admin dashboard
 router.get('/all', async (req, res) => {
     try {
         const courses = await Course.find();
@@ -111,7 +111,7 @@ router.get('/all', async (req, res) => {
     }
 });
 
-// POST /api/courses — create a new course (admin)
+// POST /api/courses create a new course (admin)
 router.post('/', async (req, res) => {
     try {
         const { courseName, courseCode, instructor, categories, isActive } = req.body;
@@ -127,7 +127,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT /api/courses/:id — update a course (admin)
+// PUT /api/courses/:id  update a course (admin)
 router.put('/:id', async (req, res) => {
     try {
         const updateData = { ...req.body };
@@ -147,7 +147,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE /api/courses/:id — delete a course (admin)
+// DELETE /api/courses/:id  delete a course (admin)
 router.delete('/:id', async (req, res) => {
     try {
         const deletedCourse = await Course.findByIdAndDelete(req.params.id);

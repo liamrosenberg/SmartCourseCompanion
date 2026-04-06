@@ -10,12 +10,12 @@ if (!AUTH.isLoggedIn()){
 const API_URL = 'http://localhost:5000';
 const user = AUTH.getUser();
 
-// used by the edit form and cancel action
+
 let currentAssessments = [];
-// full list used for cumulative worth validation
+
 let allFetchedAssessments = [];
 
-// Chart instances — kept so we can destroy them before re-rendering on refresh
+
 let barChart = null;
 let doughnutChart = null;
 
@@ -105,7 +105,7 @@ function displayAssessments(assessments){
             (() => { const d = new Date(assessment.dueDate); d.setHours(0, 0, 0, 0); return d < today; })();
         const status = assessment.isCompleted ? 'success' : isOverdue ? 'danger' : 'warning';
         const statusText = assessment.isCompleted ? 'Completed' : isOverdue ? 'Overdue' : 'Pending';
-        const dueDateStr = assessment.dueDate ? new Date(assessment.dueDate).toLocaleDateString() : 'No due date';
+        const dueDateStr = assessment.dueDate ? new Date(assessment.dueDate).toLocaleDateString('en-US', { timeZone: 'UTC' }) : 'No due date';
         const dueDate = dueDateStr;
         const id = AUTH.escapeHtml(assessment._id);
 
@@ -149,8 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // handle edit/delete/save/cancel on all assessment items
     const assessmentList = document.querySelector('.assessment-list');
     assessmentList.addEventListener('click', async (e) => {
-        // closest() walks up from the actual click target (text node, icon, etc.)
-        // to the nearest ancestor (or self) that has data-action — more reliable than e.target directly
+        
         const button = e.target.closest('[data-action]');
         if (!button) return;
 
@@ -168,8 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 // EXPORT GRADES TO CSV
 // ============================================
-// Fetches ALL of the user's assessments (not just the dashboard preview of 3),
-// converts them to CSV, and triggers a file download in the browser.
+// Fetches ALL of the user's assessments
 
 async function exportGradesToCSV() {
     try {
@@ -203,7 +201,7 @@ async function exportGradesToCSV() {
                 (() => { const d = new Date(a.dueDate); d.setHours(0, 0, 0, 0); return d < today; })();
             const status = a.isCompleted ? 'Completed' : isOverdue ? 'Overdue' : 'Pending';
 
-            // Wrap text fields in quotes; double any internal quotes to stay valid CSV
+            // Wrap text fields in quotes; for csv format
             const q = str => `"${String(str || '').replace(/"/g, '""')}"`;
 
             return [
@@ -222,7 +220,7 @@ async function exportGradesToCSV() {
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url  = URL.createObjectURL(blob);
 
-        // Create a temporary link, click it to trigger the download, then clean up
+        // Create a temporary link 
         const filename = `grades_${user.username || 'export'}_${new Date().toISOString().slice(0, 10)}.csv`;
         const link = document.createElement('a');
         link.href     = url;
@@ -242,7 +240,6 @@ async function exportGradesToCSV() {
 // ============================================
 // DASHBOARD REFRESH
 // ============================================
-// Re-fetches stats, redraws both charts, and reloads the assessment list.
 // Called after any change (edit/delete) so the UI stays in sync without a page reload.
 
 async function refreshDashboard() {
@@ -455,7 +452,7 @@ function createBarChartWithData(courseAverages) {
     const courseCodes = Object.keys(courseAverages || {});
     const averages = courseCodes.map(code => parseFloat(courseAverages[code].average));
     
-    // If no data, show placeholder
+    // placeholder
     if (courseCodes.length === 0) {
         courseCodes.push('No Courses');
         averages.push(0);

@@ -1,4 +1,4 @@
-// Loading env variables and cron jobs
+
 require('dotenv').config();
 require('./utils/cronJobs');
 

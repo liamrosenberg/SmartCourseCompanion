@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Setup the Template Dropdown Listener
+    
     const templateSelect = document.getElementById('courseTemplateSelect');
 
     if (templateSelect) {

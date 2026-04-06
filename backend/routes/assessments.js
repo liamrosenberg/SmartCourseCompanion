@@ -3,8 +3,7 @@ const router = express.Router();
 const Assessment = require('../models/Assessment'); // Ray's model
 const verifyToken = require('../middleware/authMiddleware'); // Liam's auth
 
-// POST /api/assessments — create a new scheduled/pending assessment (no marks yet)
-// Used by the courseDetails calendar to schedule upcoming tasks
+// POST /api/assessments create new assessment
 router.post('/', async (req, res) => {
     try {
         const { courseCode, name, description, dueDate } = req.body;
@@ -45,7 +44,7 @@ router.post('/add-grade', verifyToken, async (req, res) => {
     });
     await newEntry.save();
 
-    // SERVER-SIDE CALCULATION (weighted average: sum(score × weight) / sum(weight))
+    // grade CALCULATION 
     const allGrades = await Assessment.find({ user: req.user.id, courseCode, earnedMarks: { $exists: true }, totalMarks: { $exists: true } });
     const weightedSum = allGrades.reduce((sum, g) => sum + g.earnedMarks * g.totalMarks, 0);
     const worthSum    = allGrades.reduce((sum, g) => sum + g.totalMarks, 0);
@@ -74,7 +73,7 @@ router.get('/average/:courseCode', verifyToken, async (req, res) => {
     }
 });
 
-// PUT /api/assessments/:assessmentId — update an assessment the logged-in user owns
+// PUT /api/assessments/:assessmentId update assessment
 router.put('/:assessmentId', async (req, res) => {
     try {
         const assessment = await Assessment.findOne({
@@ -112,7 +111,7 @@ router.put('/:assessmentId', async (req, res) => {
     }
 });
 
-// DELETE /api/assessments/:assessmentId — delete an assessment the logged-in user owns
+// DELETE /api/assessments/:assessmentId
 router.delete('/:assessmentId', async (req, res) => {
     try {
         const assessment = await Assessment.findOneAndDelete({
@@ -131,7 +130,7 @@ router.delete('/:assessmentId', async (req, res) => {
     }
 });
 
-// GET /api/assessments/:userId — get all assessments for a user (for dashboard)
+// GET /api/assessments/:userId
 router.get('/:userId', async (req, res) => {
     try {
         const assessments = await Assessment.find({ user: req.params.userId }).sort({ _id: -1 });

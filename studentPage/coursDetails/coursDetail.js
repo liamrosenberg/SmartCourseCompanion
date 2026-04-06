@@ -1,20 +1,21 @@
 // GLOBAL SCOPE: All functions can see these
 let myCourses = [];
-// This acts as the bridge between your page
+
 let courseGrades = {};
 let calendar; 
 
-//specific course colors
-const courseColors = {
-    "SOEN 287": "#2563eb", // Blue
-    "COMP 249": "#10b981", // Green
-    "ENGR 233": "#f59e0b", // Orange
-    "ENGR 213": "#8b5cf6", // Purple
-    "MATH 205": "#ef4444", // Red
-    "General":  "#64748b"  // Slate Gray
-};
+// Dynamically assigned colors for each course
+const colorPalette = ["#2563eb","#10b981","#f59e0b","#8b5cf6","#ef4444","#64748b","#ec4899","#14b8a6","#f97316","#6366f1"];
+const courseColors = {};
+function getCourseColor(courseCode) {
+    if (!courseColors[courseCode]) {
+        const index = Object.keys(courseColors).length % colorPalette.length;
+        courseColors[courseCode] = colorPalette[index];
+    }
+    return courseColors[courseCode];
+}
 
-//master array with all the classes
+
 let allAssessments = [];
 
 let cdFilter = 'all';
@@ -29,14 +30,13 @@ async function loadDataFromServer() {
 
     try {
         // 1. Fetch this user's assessments for the Calendar
-        // Route is GET /api/assessments/:userId — must pass the logged-in user's ID
+        // Route is GET /api/assessments/:userId
         const res = await fetch(`http://localhost:5000/api/assessments/${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const rawAssessments = await res.json();
 
         // Map DB field names (dueDate, courseCode) to what the calendar expects (date, course)
-        // dueDate is an ISO string like "2026-04-15T00:00:00.000Z" — slice to "YYYY-MM-DD"
         allAssessments = Array.isArray(rawAssessments) ? rawAssessments.map(a => ({
             ...a,
             date: a.dueDate ? a.dueDate.substring(0, 10) : null,
@@ -105,7 +105,7 @@ function renderAssessmentItem(a) {
         (() => { const d = new Date(a.dueDate); d.setHours(0, 0, 0, 0); return d < t; })();
     const badgeClass = a.isCompleted ? 'badge-success' : isOverdue ? 'badge-danger' : 'badge-warning';
     const statusText = a.isCompleted ? 'Completed' : isOverdue ? 'Overdue' : 'Pending';
-    const dueDateStr = a.dueDate ? new Date(a.dueDate).toLocaleDateString() : 'No due date';
+    const dueDateStr = a.dueDate ? new Date(a.dueDate).toLocaleDateString('en-US', { timeZone: 'UTC' }) : 'No due date';
     const id = AUTH.escapeHtml(a._id);
 
     return `
@@ -205,7 +205,7 @@ async function saveCdAssessment(id, container) {
         if (total <= 0)    { showError('Worth % must be greater than 0.'); return; }
         if (total > 100)   { showError('Worth % cannot exceed 100%.'); return; }
 
-        // Cumulative worth check — exclude the assessment being edited
+        // Cumulative worth check, exclude the assessment being edited
         const current = allAssessments.find(x => x._id === id);
         const courseCode = current ? current.courseCode : null;
         if (courseCode) {
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
     populateCourseDropdown();
     populateTabs();
 
-    // All Assessments card — filter buttons
+    // filter buttons
     document.getElementById('cdFilters').addEventListener('click', e => {
         const btn = e.target.closest('[data-filter]');
         if (!btn) return;
@@ -272,13 +272,13 @@ document.addEventListener('DOMContentLoaded', function() {
         displayAllAssessments(allAssessments);
     });
 
-    // All Assessments card — sort
+    // sort
     document.getElementById('cdSort').addEventListener('change', e => {
         cdSort = e.target.value;
         displayAllAssessments(allAssessments);
     });
 
-    // All Assessments card — Mark Complete/Pending + Delete
+    // Mark Complete/Pending + Delete
     document.getElementById('allAssessmentsList').addEventListener('click', async e => {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
@@ -322,29 +322,29 @@ document.addEventListener('DOMContentLoaded', function() {
         height: 650,
         selectable: true,
         dateClick: function(info) {
-            // 1. Hide the Add Form and Grade Form
+            // Hide the Add Form and Grade Form
             document.getElementById('assessment-card').style.display = 'none';
             const gradeCard = document.getElementById('grade-card');
             if (gradeCard) gradeCard.style.display = 'none';
             
-            // 2. Show the Daily Overview card
+            // Show the Daily Overview card
             const dailyCard = document.getElementById('daily-info-card');
             dailyCard.style.display = 'block';
             dailyCard.setAttribute('data-selected-date', info.dateStr); // Save the date
 
             document.getElementById('daily-info-subtitle').innerText = "Tasks for " + info.dateStr;
 
-            // 3. Find events for this specific day
+            // Find events for this specific day
             const eventsToday = allAssessments.filter(a => a.date === info.dateStr);
             const listContainer = document.getElementById('daily-event-list');
             listContainer.innerHTML = ''; // Clear out old data
 
-            // 4. Draw the tasks on the screen!
+            // Draw tasks
             if (eventsToday.length === 0) {
                 listContainer.innerHTML = '<p class="text-muted" style="margin-bottom: 20px;">No tasks scheduled for this day.</p>';
             } else {
                 eventsToday.forEach(event => {
-                    let blockColor = courseColors[event.course] || '#2563eb';
+                    let blockColor = getCourseColor(event.course);
                     listContainer.innerHTML += `
                         <div class="task-item" style="border-left: 4px solid ${blockColor}; padding-left: 12px;">
                             <div>
@@ -386,7 +386,7 @@ async function saveNewAssessment() {
         return;
     }
 
-    // NEW: Send the task to Liam's server to be saved in MongoDB
+    // send task to mongo
     try {
         await fetch('http://localhost:5000/api/assessments', {
             method: 'POST',
@@ -397,12 +397,12 @@ async function saveNewAssessment() {
             body: JSON.stringify({
                 name: name,
                 description: desc,
-                dueDate: date, // Matches Ray's model name
+                dueDate: date, 
                 courseCode: course
             })
         });
 
-        // After saving, reload everything from the server so the calendar updates
+        // update calendar
         await loadDataFromServer();
 
         // Reset UI
@@ -417,7 +417,7 @@ async function saveNewAssessment() {
     }
 }
 
-// 3. TAB LOGIC: Controls what cards are visible
+// TAB LOGIC: Controls what cards are visible
 function switchTab(clickedButton, courseName) {
     document.querySelectorAll('.tab-btn').forEach(tab => {
         tab.classList.remove('btn-primary');
@@ -447,12 +447,11 @@ function switchTab(clickedButton, courseName) {
     updateCourseAverage(courseName);
 }
 
-// 4. DYNAMIC UI LOADERS
 function populateCourseDropdown(){
     const select = document.getElementById('assessment-course-select');
     if (!select) return;
     select.innerHTML = '<option value="" disabled selected>Select a course...</option>'; 
-    //will allow to add task to general course
+    //this will allow to add task to general course
     select.innerHTML += '<option value="General">General</option>';
 
     myCourses.forEach(course => {
@@ -493,14 +492,14 @@ function updateCalendarView(courseName){
     } else {
         eventsToShow = allAssessments.filter(assessment => assessment.course === courseName)
     }
-    //now we show the filtered events on the calender 
+    //show the filtered events on the calender 
     eventsToShow.forEach(assessment => {
-        //ex. if "All courses" we will se SOEN 287: Quiz 1, if a specific tab then simply Quiz 1
+        
         let displayTitle = (courseName === 'All' || courseName === 'All Courses')
             ? `${assessment.course}: ${assessment.name}` //if true 
             : assessment.name //else
-        //now we get the correct color for the course
-        let blockColor = courseColors[assessment.course] || '#2563eb'
+        //get the correct color for the course
+        let blockColor = getCourseColor(assessment.course)
 
         calendar.addEvent({
             title: displayTitle,
@@ -512,12 +511,12 @@ function updateCalendarView(courseName){
     });
 }
 
-//this function will allow swap between daily schedule and add event
+// allow swap between daily schedule and add event
 function showAddAssessmentForm() {
     const dailyCard = document.getElementById('daily-info-card');
     const date = dailyCard.getAttribute('data-selected-date');
 
-    // Guard: user must click a calendar date before adding an assessment
+    // user must click a calendar date before adding an assessment
     if (!date) {
         alert('Please click a date on the calendar first.');
         return;
@@ -536,59 +535,58 @@ function showAddAssessmentForm() {
 
 // Function to delete tasks from the list and calendar
 function deleteTask(taskName, taskDate, btnElement) {
-    // 1. Ask for confirmation
+    // Ask for confirmation
     if(confirm(`Are you sure you want to delete "${taskName}"?`)) {
         
-        // 2. Remove it from your master database array
+        // Remove from your master database array
         allAssessments = allAssessments.filter(task => !(task.name === taskName && task.date === taskDate));
         
-        // 3. Smoothly fade it out, then delete it from the screen
+        // delete
         const taskBlock = btnElement.closest('.task-item');
         taskBlock.style.opacity = '0';
         
         setTimeout(() => {
             taskBlock.remove();
             
-            // If that was the last task, put the "No tasks" text back
+            
             const listContainer = document.getElementById('daily-event-list');
             if (listContainer.children.length === 0) {
                 listContainer.innerHTML = '<p class="text-muted" style="margin-bottom: 20px;">No tasks scheduled for this day.</p>';
             }
         }, 200); 
         
-        // 4. Wipe it off the actual calendar grid
+       
         let activeTabBtn = document.querySelector('.tab-btn.btn-primary');
         let activeTab = activeTabBtn ? activeTabBtn.textContent : 'All Courses';
         updateCalendarView(activeTab);
     }
 }
 
-// Function to pull task data back into the form for editing
+// pull task data back into the form for editing
 function editTask(taskName, taskDate) {
     // 1. Find the original task in your database array
     const taskToEdit = allAssessments.find(task => task.name === taskName && task.date === taskDate);
     if (!taskToEdit) return; // Failsafe
 
-    // 2. Paste the data back into your input boxes
+    // Paste data
     document.getElementById('assessment-name-input').value = taskToEdit.name;
     document.getElementById('assessment-desc-input').value = taskToEdit.description || '';
     document.getElementById('assessment-course-select').value = taskToEdit.course;
 
-    // 3. Swap the side panels
+    // Swap the side panels
     document.getElementById('daily-info-card').style.display = 'none';
     const assessmentCard = document.getElementById('assessment-card');
     assessmentCard.style.display = 'block';
 
-    // 4. Update the headers to say "Edit" instead of "Add"
+    // Update the headers to say "Edit" instead of "Add"
     assessmentCard.setAttribute('data-selected-date', taskDate);
     document.getElementById('selected-date-header').innerText = "Edit Assessment";
     document.getElementById('selected-date-subtitle').innerText = "Updating task for: " + taskDate;
 
-    // 5. Delete the OLD version from the array!
-    // (This way, when you hit "Save", it pushes the new version instead of a duplicate)
+    
     allAssessments = allAssessments.filter(task => !(task.name === taskName && task.date === taskDate));
     
-    // 6. Refresh the calendar to clear the old block while you edit
+    
     let activeTabBtn = document.querySelector('.tab-btn.btn-primary');
     let activeTab = activeTabBtn ? activeTabBtn.textContent : 'All Courses';
     updateCalendarView(activeTab);
@@ -602,7 +600,7 @@ async function saveNewGrade() {
 
     clearMsgs();
 
-    // 1. Must have a specific course tab selected (not "All Courses")
+    // Must have a specific course tab selected (not "All Courses")
     const activeTabBtn = document.querySelector('.tab-btn.btn-primary');
     const courseCode = activeTabBtn ? activeTabBtn.textContent.trim() : '';
     if (!courseCode || courseCode === 'All Courses') {
@@ -610,11 +608,11 @@ async function saveNewGrade() {
         return;
     }
 
-    // 2. Name cannot be empty
+    // Name cannot be empty
     const name = document.getElementById('grade-name-input').value.trim();
     if (!name) { showError('Evaluation name cannot be empty.'); return; }
 
-    // 3. Earned marks validation
+    // Earned marks validation
     const earnedRaw = document.getElementById('earned').value;
     if (earnedRaw === '') { showError('Earned marks cannot be empty.'); return; }
     const earnedMarks = parseFloat(earnedRaw);
@@ -622,7 +620,7 @@ async function saveNewGrade() {
     if (earnedMarks < 0)          { showError('Earned marks cannot be negative.'); return; }
     if (earnedMarks > 100)        { showError('Earned marks cannot exceed 100.'); return; }
 
-    // 4. Worth % validation
+    // Worth % validation
     const worthRaw = document.getElementById('total').value;
     if (worthRaw === '') { showError('Worth % cannot be empty.'); return; }
     const worthPct = parseFloat(worthRaw);
@@ -630,7 +628,7 @@ async function saveNewGrade() {
     if (worthPct <= 0)      { showError('Worth % must be greater than 0.'); return; }
     if (worthPct > 100)     { showError('Worth % cannot exceed 100%.'); return; }
 
-    // 5. Cumulative worth % for this course cannot exceed 100%
+    // Cumulative worth % for this course cannot exceed 100%
     const existingWorth = allAssessments
         .filter(a => a.courseCode === courseCode && (a.source === 'grade' || (a.source == null && a.isCompleted && a.earnedMarks != null)) && a.totalMarks != null)
         .reduce((sum, a) => sum + a.totalMarks, 0);
@@ -643,7 +641,7 @@ async function saveNewGrade() {
         return;
     }
 
-    // 6. Save
+    // Save
     const token = localStorage.getItem('token');
     try {
         const response = await fetch('http://localhost:5000/api/assessments/add-grade', {

@@ -2,7 +2,7 @@ if (!AUTH.isLoggedIn()) {
     window.location.href = '../login-registration/landingPage.html';
 }
 
-// Concordia-style letter grade → 4.3-scale GPA points
+// Concordia style letter grade → 4.3-scale GPA points
 // Based on percentage ranges
 function percentToGradePoints(pct) {
     if (pct >= 90) return 4.3;
@@ -52,7 +52,7 @@ function addRow(courseName, grade, credits) {
     `;
     tbody.appendChild(tr);
 
-    // If pre-filled grade, show letter right away
+    // If pre-filled grade then show letter right away
     if (grade !== undefined && grade !== '') {
         const letterCell = tr.querySelector(`#letter-${rowCount}`);
         if (letterCell) letterCell.textContent = percentToLetterGrade(Number(grade));
@@ -138,6 +138,6 @@ function showCalcToast(message, type) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Start with 3 empty rows so the table isn't intimidating
+    // Start with 3 empty rows
     addRow(); addRow(); addRow();
 });
