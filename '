@@ -1,0 +1,299 @@
+[1mdiff --git a/Login/login.html b/Login/login.html[m
+[1mdeleted file mode 100644[m
+[1mindex e69de29..0000000[m
+[1mdiff --git a/Login/login.js b/Login/login.js[m
+[1mdeleted file mode 100644[m
+[1mindex e69de29..0000000[m
+[1mdiff --git a/adminPage/adminPage.html b/adminPage/adminPage.html[m
+[1mindex e69de29..9dbca30 100644[m
+[1m--- a/adminPage/adminPage.html[m
+[1m+++ b/adminPage/adminPage.html[m
+[36m@@ -0,0 +1,116 @@[m
+[32m+[m[32m<!DOCTYPE html>[m
+[32m+[m[32m<html lang="en">[m
+[32m+[m[32m<html>[m
+[32m+[m[32m    <head>[m
+[32m+[m[32m        <meta charset = "UTF-8">[m
+[32m+[m[32m        <meta name = "viewport" content = "width=device-width, initial scale=1.0">[m
+[32m+[m
+[32m+[m[32m        <title>Admin Page</title>[m
+[32m+[m[32m        <link rel ="stylesheet" href="../css/style.css">[m
+[32m+[m[32m        <link rel="stylesheet" href="../components/ToggleTheme/toggleStyle.css">[m
+[32m+[m[32m    </head>[m
+[32m+[m
+[32m+[m[32m    <body>[m
+[32m+[m[32m        <header class="dashboard-header">[m
+[32m+[m[32m            <div class = "container flex-between" style="align-items: center;">[m
+[32m+[m[32m                <div>[m
+[32m+[m[32m                <h1>Admin Dashboard</h1>[m
+[32m+[m[32m                <p class="text-secondary">Welcome back, Professor</p>[m
+[32m+[m[32m                </div>[m
+[32m+[m[32m                <div id="toggle-slot"></div>[m
+[32m+[m[32m        </header>[m
+[32m+[m
+[32m+[m[32m        <main class="main-content">[m
+[32m+[m[32m            <div class="container">[m
+[32m+[m
+[32m+[m[32m                <section class="mb-x1">[m
+[32m+[m[32m                    <div class="card">[m
+[32m+[m[32m                        <div class="card-body">[m
+[32m+[m[32m                            <input type="text" class="search-input" placeholder="Search Course By ID" style ="width: 100%; padding: var(--space-sm) var(--space-md); border:1px solid var(--neutral-300); border-radius: var(--radius-md); font-family: inherit; font-size: 1rem;">[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    </div>[m
+[32m+[m[32m                </section>[m
+[32m+[m
+[32m+[m[32m                <section class = "mb-xl">[m
+[32m+[m[32m                    <h2 class ="mb-md">Student Statistics</h2>[m
+[32m+[m[32m                    <div class = "grid grid-3">[m
+[32m+[m[32m                        <div class="card text-center">[m
+[32m+[m[32m                            <div class="stat-number text-primary">83.4%</div>[m
+[32m+[m[32m                            <div class="stat-label">Average Assignment Completion</div>[m
+[32m+[m[32m                            <p class="text-secondary mt-sm">Across all active courses</p>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    <div class = "card text-center">[m
+[32m+[m[32m                        <div class="stat-number text-success">15</div>[m
+[32m+[m[32m                        <div class="stat-label">Active courses</div>[m
+[32m+[m[32m                        <p class="text-secondary mt-sm">Currently enabled for students</p>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    <div class="card text-center">[m
+[32m+[m[32m                        <div class="stat-number text-warning">35%</div>[m
+[32m+[m[32m                        <div class="stat-label">Average midterm weight</div>[m
+[32m+[m[32m                        <p class="text-secondary mt-sm">Across all active courses</p>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                </section>[m[41m  [m
+[32m+[m[41m                [m
+[32m+[m[32m                <section>[m
+[32m+[m[32m                    <div class="flex-between" style="align-items: center; margin-bottom: var(--space-md);">[m
+[32m+[m[32m                        <h2 style ="margin: 0;">Course Management</h2>[m
+[32m+[m[32m                        <a href ="courseCreate.html">[m
+[32m+[m[32m                        <button class="btn btn-primary">+ Create New Courses</button>[m
+[32m+[m[32m                        </a>[m
+[32m+[m[32m                    </div>[m
+[32m+[m[41m                    [m
+[32m+[m[32m                    <div class="assessment-list">[m
+[32m+[m[32m                        <div class="card">[m
+[32m+[m[32m                            <div class="card-header">[m
+[32m+[m[32m                                <h3 class="card-title">SOEN 287: Web Programming</h3>[m
+[32m+[m[32m                                <h4 class ="text-center">ID:S287</p>[m
+[32m+[m
+[32m+[m[32m                                <button class = "btn btn-tertiary"onclick="enableDisable(this)">Enabled</button>[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                <script>[m
+[32m+[m[32m                                function enableDisable(btn){[m
+[32m+[m[41m                                    [m
+[32m+[m[32m                                        if(btn.innerText ==='Enabled'){[m
+[32m+[m[32m                                            btn.innerText='Disabled';[m
+[32m+[m[32m                                            btn.style.backgroundColor = "#ff3838";[m
+[32m+[m[32m                                        }else{[m
+[32m+[m[32m                                            btn.innerText = "Enabled";[m
+[32m+[m[32m                                            btn.style.backgroundColor = "#30d630";[m
+[32m+[m[32m                                        }[m
+[32m+[m[32m                                    }[m
+[32m+[m[32m                                </script>[m
+[32m+[m[41m                        [m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                        <div class="card-body">[m
+[32m+[m[32m                            <div class="grid grid-3">[m
+[32m+[m[32m                                <div>[m
+[32m+[m[32m                                    <h4> Assesment Weightings</h4>[m
+[32m+[m[32m                                    <p class="text-secondary ">Midterm (<span class="weight-value" data-label="Midterm">30</span>%)</p>[m
+[32m+[m[32m                                    <p class="text-secondary ">Final (<span class = "weight-value" data-label="Final">40</span>%)</p>[m
+[32m+[m[32m                                    <p class="text-secondary">Assignments (<span class = "weight-value" data-label="Assignments">30</span>%)</p>[m
+[32m+[m[32m                                    </div>[m
+[32m+[m[32m                                    <div id = "upcoming-assessments">[m
+[32m+[m[32m                                        <h4>Upcoming Assesments</h4>[m
+[32m+[m[32m                                        <p class ="text-secondary assessment-item">Deliverable 1: Frontend</p>[m
+[32m+[m[32m                                        <p class = "text-secondary assessment-item">Midterm 1: March 22nd, 10:30am</p>[m
+[32m+[m[32m                                        </div>[m
+[32m+[m[32m                                        <div>[m
+[32m+[m[32m                                            <h4>Current Submissions</h4>[m
+[32m+[m[32m                                            <p class="text-secondary">13/30 43.3%</p>[m
+[32m+[m[32m                                        </div>[m
+[32m+[m
+[32m+[m[32m                                        <div class="button-secondary" style="margin-bottom: var(); justify-content: flex-start;">[m
+[32m+[m[32m                                            <button id ="edit-weightings-btn" class="btn btn-secondary" >Edit Weightings</button>[m
+[32m+[m[32m                                        </div>[m
+[32m+[m[32m                                        <div class="button-secondary" style="margin-bottom: var(--space-md); justify-content: flex-start;">[m
+[32m+[m[32m                                            <button id="edit-assessments-btn" class="btn btn-secondary">Edit Assessments</button>[m
+[32m+[m[41m                                            [m
+[32m+[m[32m                                        </div>[m
+[32m+[m[32m                                 </div>[m
+[32m+[m[41m                                        [m
+[32m+[m[32m                </section>[m
+[32m+[m[32m                <script src="adminPage.js"></script>[m
+[32m+[m[32m                <script src="../components/ToggleTheme/toggle-theme.js"></script>[m
+[32m+[m[32m    </body>[m
+[32m+[m[32m    </html>[m
+\ No newline at end of file[m
+[1mdiff --git a/adminPage/adminPage.js b/adminPage/adminPage.js[m
+[1mindex e69de29..762a5de 100644[m
+[1m--- a/adminPage/adminPage.js[m
+[1m+++ b/adminPage/adminPage.js[m
+[36m@@ -0,0 +1,72 @@[m
+[32m+[m[32mfunction enableDisable(btn){[m
+[32m+[m[41m                                    [m
+[32m+[m[32m                                        if(btn.innerText ==='Enabled'){[m
+[32m+[m[32m                                            btn.innerText='Disabled';[m
+[32m+[m[32m                                            btn.style.backgroundColor = "#ff3838";[m
+[32m+[m[32m                                        }else{[m
+[32m+[m[32m                                            btn.innerText = "Enabled";[m
+[32m+[m[32m                                            btn.style.backgroundColor = "#30d630";[m
+[32m+[m[32m                                        }[m
+[32m+[m[32m                                    }[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    const editWeightingsBtn = document.getElementById('edit-weightings-btn');[m
+[32m+[m[32m    const weightValues = document.querySelectorAll('.weight-value');[m
+[32m+[m
+[32m+[m[32m    editWeightingsBtn.addEventListener('click', function() {[m
+[32m+[m[32m        const isEditing = this.innerText === 'Save Weightings';[m
+[32m+[m
+[32m+[m[32m        if (isEditing) {[m
+[32m+[m[32m            // Switch back to normal mode (Save)[m
+[32m+[m[32m            weightValues.forEach(span => {[m
+[32m+[m[32m                span.contentEditable = "false";[m
+[32m+[m[32m                span.style.border = "none";[m
+[32m+[m[32m                span.style.padding = "0";[m
+[32m+[m[32m                span.style.backgroundColor = "transparent";[m
+[32m+[m[32m            });[m
+[32m+[m[32m            this.innerText = 'Edit Weightings';[m
+[32m+[m[41m            [m
+[32m+[m[41m            [m
+[32m+[m[32m        } else {[m
+[32m+[m[32m            // Switch to Edit mode[m
+[32m+[m[32m            weightValues.forEach(span => {[m
+[32m+[m[32m                span.contentEditable = "true";[m
+[32m+[m[32m                span.style.border = "1px solid #547eaa";[m[41m [m
+[32m+[m[32m                span.style.padding = "2px 5px";[m
+[32m+[m[32m                span.style.backgroundColor = "#fff";[m
+[32m+[m[32m                span.style.borderRadius = "4px";[m
+[32m+[m[32m            });[m
+[32m+[m[32m            this.innerText = 'Save Weightings';[m
+[32m+[m[32m        }[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    // --- Edit Assessments Logic ---[m
+[32m+[m[32m    const editAssessmentsBtn = document.getElementById('edit-assessments-btn');[m
+[32m+[m[32m    const assessmentItems = document.querySelectorAll('.assessment-item');[m
+[32m+[m
+[32m+[m[32m    editAssessmentsBtn.addEventListener('click', function() {[m
+[32m+[m[32m        const isEditing = this.innerText === 'Save Assessments';[m
+[32m+[m
+[32m+[m[32m        if (isEditing) {[m
+[32m+[m[41m            [m
+[32m+[m[32m            assessmentItems.forEach(item => {[m
+[32m+[m[32m                item.contentEditable = "false";[m
+[32m+[m[32m                item.style.border = "none";[m
+[32m+[m[32m                item.style.padding = "0";[m
+[32m+[m[32m                item.style.backgroundColor = "transparent";[m
+[32m+[m[32m            });[m
+[32m+[m[32m            this.innerText = 'Edit Assessments';[m
+[32m+[m[32m        } else {[m
+[32m+[m[32m            // Switch to Edit mode[m
+[32m+[m[32m            assessmentItems.forEach(item => {[m
+[32m+[m[32m                item.contentEditable = "true";[m
+[32m+[m[32m                item.style.border = "1px solid #547eaa";[m
+[32m+[m[32m                item.style.padding = "2px 5px";[m
+[32m+[m[32m                item.style.backgroundColor = "#fff";[m
+[32m+[m[32m                item.style.borderRadius = "4px";[m
+[32m+[m[32m            });[m
+[32m+[m[32m            this.innerText = 'Save Assessments';[m
+[32m+[m[32m        }[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[41m    [m
+\ No newline at end of file[m
+[1mdiff --git a/adminPage/courseCreate.html b/adminPage/courseCreate.html[m
+[1mnew file mode 100644[m
+[1mindex 0000000..56e8d3c[m
+[1m--- /dev/null[m
+[1m+++ b/adminPage/courseCreate.html[m
+[36m@@ -0,0 +1,101 @@[m
+[32m+[m[32m<!DOCTYPE html>[m
+[32m+[m[32m<html lang="en">[m
+[32m+[m[32m    <head>[m
+[32m+[m[32m        <meta charset = "UTF-8">[m
+[32m+[m[32m        <meta name = "viewport" content = "width=device-width, initial scale=1.0">[m
+[32m+[m[32m        <title>Course Creation</title>[m
+[32m+[m[32m        <link rel ="stylesheet" href="../css/style.css">[m
+[32m+[m[32m        <link rel="stylesheet" href="../components/ToggleTheme/toggleStyle.css">[m
+[32m+[m[32m    </head>[m
+[32m+[m
+[32m+[m[32m    <body>[m
+[32m+[m[32m        <header class="dashboard-header">[m
+[32m+[m[32m            <div class = "container flex-between" style="align-items: center;">[m
+[32m+[m[32m                <div>[m
+[32m+[m[32m                <h1>Course Creation</h1>[m
+[32m+[m[32m                <p class="text-secondary">Set Up New Courses For Students.</p>[m
+[32m+[m[32m                </div>[m
+[32m+[m[32m                <div>[m
+[32m+[m[32m                    <a href="adminPage.html" class="btn btn-secondary">← Back to Dashboard</a>[m
+[32m+[m[32m                </div>[m
+[32m+[m[32m                <div id="toggle-slot"></div>[m
+[32m+[m[32m                </div>[m
+[32m+[m[41m                [m
+[32m+[m[32m        </header>[m
+[32m+[m[32m<form>[m
+[32m+[m[32m        <main class="main-content">[m
+[32m+[m[32m            <div class = "container">[m
+[32m+[m[41m                [m
+[32m+[m[32m                <section class="mb-x1">[m
+[32m+[m[32m                    <div class="card">[m
+[32m+[m[32m                        <div class="card-body">[m
+[32m+[m[41m           [m
+[32m+[m[32m                            <h3 style="border-bottom: 1px solid var(--neutral-200); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">Basic Information</h3>[m
+[32m+[m[41m                            [m
+[32m+[m[32m                            <div class="grid grid-3" style="margin-bottom: var(--space-lg);">[m
+[32m+[m[32m                                    <div style = "grid-column: span 2;">[m
+[32m+[m[32m                                        <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Course Name</label>[m
+[32m+[m[32m                                        <input type="text" placeholder="e.g. Intro to Computer Science" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit;">[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                            <div>[m
+[32m+[m[32m                                <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Course Code</label>[m
+[32m+[m[32m                                <input type="text" placeholder="e.g. CS101" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit;">[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                        </div>[m
+[32m+[m
+[32m+[m[32m                        <h3 style="border-bottom: 1px solid var(--neutral-200); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">Define Assessment Weightings</h3>[m
+[32m+[m[41m                        [m
+[32m+[m[32m                        <div class="flex-between" style="gap: var(--space-md); margin-bottom: var(--space-md);">[m
+[32m+[m
+[32m+[m[32m                            <div style="flex: 1;">[m
+[32m+[m[32m                                <label style="display: block; font-size: 0.875rem; margin-bottom: var(--space-xs);">Category 1 (e.g. Midterm)</label>[m
+[32m+[m[32m                                <input type="text" placeholder="Category Name" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); margin-bottom: var(--space-xs);">[m
+[32m+[m[32m                                <input type="number" placeholder="Weight (%)" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">[m
+[32m+[m[32m                            </div>[m
+[32m+[m
+[32m+[m[32m                            <div style="flex: 1;">[m
+[32m+[m[32m                                <label style="display: block; font-size: 0.875rem; margin-bottom: var(--space-xs);">Category 2 (e.g. Final)</label>[m
+[32m+[m[32m                                <input type="text" placeholder="Category Name" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); margin-bottom: var(--space-xs);">[m
+[32m+[m[32m                                <input type="number" placeholder="Weight (%)" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">[m
+[32m+[m[32m                            </div>[m
+[32m+[m
+[32m+[m[32m                            <div style="flex: 1;">[m
+[32m+[m[32m                                <label style="display: block; font-size: 0.875rem; margin-bottom: var(--space-xs);">Category 3 (e.g. Labs)</label>[m
+[32m+[m[32m                                <input type="text" placeholder="Category Name" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); margin-bottom: var(--space-xs);">[m
+[32m+[m[32m                                <input type="number" placeholder="Weight (%)" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">[m
+[32m+[m[32m                            </div>[m
+[32m+[m
+[32m+[m[32m                        </div>[m
+[32m+[m
+[32m+[m[32m                        <h3 style="border-bottom: 1px solid var(--neutral-200); padding-bottom: var(--space-sm); margin-bottom: var(--space-md);">Settings</h3>[m
+[32m+[m
+[32m+[m[32m                        <div class="grid grid-3" style="margin-bottom: var(--space-lg);">[m
+[32m+[m[32m                            <div style="grid-column: span 2;">[m
+[32m+[m[32m                                <label style="display: block; font-weight: 500; margin-bottom: var(--space-xs);">Reusable Course Structure</label>[m
+[32m+[m
+[32m+[m[32m                                <select style="width: 60%; padding: var(--space-sm); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); font-family: inherit; background: white;">[m
+[32m+[m[32m                                    <option value="none">-- Select a Template --</option>[m
+[32m+[m[32m                                    <option value="template1">Standard 12-Week Course</option>[m
+[32m+[m[32m                                    <option value="template2">Project-Based Syllabus</option>[m
+[32m+[m[32m                                    <option value="template3">Blank Canvas</option>[m
+[32m+[m[41m                                    [m
+[32m+[m[32m                                </select>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[41m                            [m
+[32m+[m[32m                        </div>[m
+[32m+[m
+[32m+[m[32m         

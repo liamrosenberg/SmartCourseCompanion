@@ -31,18 +31,16 @@ document.querySelectorAll('.close-modal-btn').forEach(button => {
     button.addEventListener('click', closeModal);
 });
 
-// --- NEW AUTHENTICATION LOGIC ---
-
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 
-// 1. Handle Login
+// Handling login
 async function handleLogin(event) {
-    event.preventDefault(); 
+    event.preventDefault();
 
-    const username = document.getElementById('loginUsername').value; 
-    const password = document.getElementById('loginPassword').value; 
-    
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+
     // Grab the value directly from the checked radio button
     const roleElement = document.querySelector('input[name="userRole"]:checked');
     const userRole = roleElement ? roleElement.value : null;
@@ -64,7 +62,7 @@ async function handleLogin(event) {
         if (response.ok) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
-            
+
             if (userRole === "admin") {
                 window.location.href = "../adminPage/adminPage.html";
             } else {
@@ -79,17 +77,17 @@ async function handleLogin(event) {
     }
 }
 
-// 2. Handle Registration
+// Handling registration
 async function handleRegister(event) {
     event.preventDefault();
 
     const firstName = document.getElementById('regFirstName').value;
     const lastName = document.getElementById('regLastName').value;
-    const username = document.getElementById('regUsername').value; 
-    const email = document.getElementById('regEmail').value;       
-    const password = document.getElementById('regPassword').value; 
-    const confirm = document.getElementById('confirmPassword').value; 
-    
+    const username = document.getElementById('regUsername').value;
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+
     // Grab the value directly from the checked radio button
     const roleElement = document.querySelector('input[name="userRole"]:checked');
     const userRole = roleElement ? roleElement.value : null;
@@ -115,7 +113,7 @@ async function handleRegister(event) {
 
         if (response.ok) {
             alert("Registration successful! Now please log in.");
-            closeModal(); 
+            closeModal();
         } else {
             alert(data.message);
         }
@@ -125,6 +123,6 @@ async function handleRegister(event) {
     }
 }
 
-// Attach the new functions to the forms
+// Attaching to the forms
 if (loginForm) loginForm.addEventListener('submit', handleLogin);
 if (registerForm) registerForm.addEventListener('submit', handleRegister);
